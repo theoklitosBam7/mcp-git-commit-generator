@@ -1,0 +1,8 @@
+{
+    "servers": {
+        "mcp-git-commit-generator": {
+            "url": "http://localhost:3001/sse",
+            "type": "sse"
+        }
+    }
+}
