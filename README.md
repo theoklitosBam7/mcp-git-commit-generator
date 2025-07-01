@@ -13,16 +13,16 @@ Generate conventional commit messages from your staged git changes using Model C
 
 - [Python](https://www.python.org/) >= 3.13.5
 - [MCP CLI](https://pypi.org/project/mcp/) >= 1.10.1
-- [Node.js](https://nodejs.org/en) (for Inspector UI)
+- (*Optional*) [Node.js](https://nodejs.org/en) (for Inspector UI)
 - (*Optional - if you prefer uv*) [uv](https://github.com/astral-sh/uv)
-- [Python Debugger Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy)
+- (*Optional*) [Python Debugger Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy)
 
 ## Installation
 
 1. **Clone the repository:**
 
    ```sh
-   git clone <repo-url>
+   git clone https://github.com/theoklitosBam7/mcp-git-commit-generator.git
    cd mcp-git-commit-generator
    ```
 
@@ -103,4 +103,4 @@ npm run dev:inspector
 
 ## License
 
-Add your license here.
+MIT License
