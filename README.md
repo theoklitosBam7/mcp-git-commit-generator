@@ -86,20 +86,44 @@ npm run dev:inspector
 
 ```sh
 .
-├── pyproject.toml
+├── .gitignore
+├── .markdownlint.jsonc
+├── .python-version
+├── .vscode/              # VSCode configuration
+├── LICENSE
 ├── README.md
-├── start-mcp-server.sh
-├── src/
+├── pyproject.toml        # Python project configuration
+├── start-mcp-server.sh   # Script to start the MCP server
+├── uv.lock              # Python dependencies lock file
+├── src/                  # Python source code
 │   ├── __init__.py
-│   └── server.py
-└── inspector/
-    └── package.json
+│   └── server.py        # Main server implementation
+└── inspector/            # Inspector related files
+    ├── package.json     # Node.js dependencies
+    └── package-lock.json
 ```
 
-## Development
+## How to debug the MCP Server
 
-- Debugging is supported via `debugpy`.
-- See `pyproject.toml` for dev dependencies.
+> Notes:
+>
+> - [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is a visual developer tool for testing
+and debugging MCP servers.
+> - All debugging modes support breakpoints, so you can add breakpoints to the tool implementation code.
+
+| Debug Mode | Description | Steps to debug |
+| ---------- | ----------- | --------------- |
+| MCP Inspector | Debug the MCP server using the MCP Inspector. | 1. Install [Node.js](https://nodejs.org/)<br> 2. Set up Inspector: `cd inspector` && `npm install` <br> 3. Open VS Code Debug panel. Select `Debug in Inspector (Edge)` or `Debug in Inspector (Chrome)`. Press F5 to start debugging.<br> 4. When MCP Inspector launches in the browser, click the `Connect` button to connect this MCP server.<br> 5. Then you can `List Tools`, select a tool, input parameters, and `Run Tool` to debug your server code.<br> |
+
+## Default Ports and customizations
+
+| Debug Mode | Ports | Definitions | Customizations | Note |
+| ---------- | ----- | ------------ | -------------- |-------------- |
+| MCP Inspector | 3001 (Server); 5173 and 3000 (Inspector) | [tasks.json](.vscode/tasks.json) | Edit [launch.json](.vscode/launch.json), [tasks.json](.vscode/tasks.json), [\_\_init\_\_.py](src/__init__.py), [mcp.json](.vscode/mcp.json) to change above ports.| N/A |
+
+## Feedback
+
+If you have any feedback or suggestions, please open an issue on the [MCP Git Commit Generator GitHub repository](https://github.com/theoklitosBam7/mcp-git-commit-generator/issues)
 
 ## License
 

@@ -91,7 +91,7 @@ def generate_commit_message(
             - Keep description under 50 characters if possible
             - If scope is obvious from files, include it in parentheses
             - If too many files are changed, consider summarizing the changes using list format in the commit body
-            - In the commit body list, capitalize the first letter and do not use a period at the end
+            - In the commit body list, use imperative mood, capitalize the first letter, and do not use a period at the end
             """
 
         return analysis
