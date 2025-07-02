@@ -4,6 +4,7 @@ FastMCP Server for generating conventional commit messages from git diff
 
 import subprocess
 from typing import Optional
+
 from mcp.server.fastmcp import FastMCP
 
 # Create the FastMCP server
@@ -18,7 +19,7 @@ def generate_commit_message(
     Generate a conventional commit message based on staged git changes.
 
     Args:
-        commit_type: Optional commit type (feat, fix, docs, style, refactor, test, chore)
+        commit_type: Optional commit type (feat, fix, docs, style, refactor, perf, build, ci, test, chore, revert)
         scope: Optional scope of the change
 
     Returns:
