@@ -72,6 +72,14 @@ python ./src/__init__.py sse
 
 2. Use the MCP tool to generate a commit message (see your MCP client for details).
 
+   **Tool arguments:**
+   - `commit_type` (optional): Conventional commit type (e.g., feat, fix, docs, etc.).
+   - `scope` (optional): Scope of the change (e.g., file or module name).
+   - `repo_path` (optional): Path to the target git repository (defaults to current directory).
+
+   > How to provide arguments depends on your MCP client. For example, in the Inspector UI, you can enter these
+   in the tool input fields.
+
 ### Start the Inspector UI
 
 From the `inspector` directory:
@@ -81,6 +89,21 @@ npm run dev:inspector
 ```
 
 - The Inspector UI will be available at `http://localhost:5173`.
+
+## Tool Arguments Reference
+
+### `generate_commit_message`
+
+- `commit_type` (str, optional): Conventional commit type (e.g., feat, fix, docs, style, etc.).
+If omitted, the type will be auto-detected.
+- `scope` (str, optional): Scope of the change. If omitted, the scope will be auto-detected based on changed files.
+- `repo_path` (str, optional): Path to the git repository. If omitted, uses the current directory.
+
+### `check_git_status`
+
+- `repo_path` (str, optional): Path to the git repository. If omitted, uses the current directory.
+
+You can provide these arguments via your MCP client or the Inspector UI when running the tools.
 
 ## Project Structure
 
@@ -110,10 +133,12 @@ npm run dev:inspector
 > - [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is a visual developer tool for testing
 and debugging MCP servers.
 > - All debugging modes support breakpoints, so you can add breakpoints to the tool implementation code.
+> - **You can test tool arguments directly in the Inspector UI**: When using the Inspector, select a tool and provide
+arguments in the input fields to simulate real usage and debug argument handling.
 
 | Debug Mode | Description | Steps to debug |
 | ---------- | ----------- | --------------- |
-| MCP Inspector | Debug the MCP server using the MCP Inspector. | 1. Install [Node.js](https://nodejs.org/)<br> 2. Set up Inspector: `cd inspector` && `npm install` <br> 3. Open VS Code Debug panel. Select `Debug in Inspector (Edge)` or `Debug in Inspector (Chrome)`. Press F5 to start debugging.<br> 4. When MCP Inspector launches in the browser, click the `Connect` button to connect this MCP server.<br> 5. Then you can `List Tools`, select a tool, input parameters, and `Run Tool` to debug your server code.<br> |
+| MCP Inspector | Debug the MCP server using the MCP Inspector. | 1. Install [Node.js](https://nodejs.org/)<br> 2. Set up Inspector: `cd inspector` && `npm install` <br> 3. Open VS Code Debug panel. Select `Debug in Inspector (Edge)` or `Debug in Inspector (Chrome)`. Press F5 to start debugging.<br> 4. When MCP Inspector launches in the browser, click the `Connect` button to connect this MCP server.<br> 5. Then you can `List Tools`, select a tool, input parameters (see arguments above), and `Run Tool` to debug your server code.<br> |
 
 ## Default Ports and customizations
 

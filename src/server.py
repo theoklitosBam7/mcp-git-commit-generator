@@ -13,7 +13,9 @@ mcp = FastMCP("Git Commit Generator")
 
 @mcp.tool()
 def generate_commit_message(
-    commit_type: Optional[str] = None, scope: Optional[str] = None
+    commit_type: Optional[str] = None,
+    scope: Optional[str] = None,
+    repo_path: Optional[str] = None,
 ) -> str:
     """
     Generate a conventional commit message based on staged git changes.
@@ -21,14 +23,20 @@ def generate_commit_message(
     Args:
         commit_type: Optional commit type (feat, fix, docs, style, refactor, perf, build, ci, test, chore, revert)
         scope: Optional scope of the change
+        repo_path: Optional path to the target git repository
 
     Returns:
         Analysis of git changes for generating conventional commit messages
     """
     try:
+        cwd = repo_path or None
         # Get staged changes
         diff_result = subprocess.run(
-            ["git", "diff", "--cached"], capture_output=True, text=True, check=True
+            ["git", "diff", "--cached"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=cwd,
         )
 
         if not diff_result.stdout.strip():
@@ -40,6 +48,7 @@ def generate_commit_message(
             capture_output=True,
             text=True,
             check=True,
+            cwd=cwd,
         )
 
         # Get list of changed files for better analysis
@@ -48,6 +57,7 @@ def generate_commit_message(
             capture_output=True,
             text=True,
             check=True,
+            cwd=cwd,
         )
 
         # Prepare analysis for the AI
@@ -138,17 +148,25 @@ def _parse_git_status_lines(status_lines):
 
 
 @mcp.tool()
-def check_git_status() -> str:
+def check_git_status(repo_path: Optional[str] = None) -> str:
     """
     Check the current git repository status.
+
+    Args:
+        repo_path: Optional path to the target git repository
 
     Returns:
         Current git status including staged, unstaged, and untracked files
     """
     try:
+        cwd = repo_path or None
         # Get full git status
         status_result = subprocess.run(
-            ["git", "status", "--porcelain"], capture_output=True, text=True, check=True
+            ["git", "status", "--porcelain"],
+            capture_output=True,
+            text=True,
+            check=True,
+            cwd=cwd,
         )
 
         # Get branch info
@@ -157,6 +175,7 @@ def check_git_status() -> str:
             capture_output=True,
             text=True,
             check=True,
+            cwd=cwd,
         )
 
         current_branch = branch_result.stdout.strip()
