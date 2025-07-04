@@ -2,6 +2,7 @@
 FastMCP Server for generating conventional commit messages from git diff
 """
 
+import os
 import subprocess
 from typing import Optional
 
@@ -9,6 +10,23 @@ from mcp.server.fastmcp import FastMCP
 
 # Create the FastMCP server
 mcp = FastMCP("Git Commit Generator")
+
+
+def get_valid_repo_path(repo_path: Optional[str]) -> Optional[str]:
+    """
+    Resolve and validate the git repository path.
+    Returns the valid repo path if valid, otherwise None.
+    """
+    print(
+        f"[get_valid_repo_path] Using current working directory: {repo_path or os.getcwd()}"
+    )
+    if repo_path is None:
+        repo_path = os.getcwd()
+    if not os.path.isdir(repo_path) or not os.path.exists(
+        os.path.join(repo_path, ".git")
+    ):
+        return None
+    return repo_path
 
 
 @mcp.tool()
@@ -23,13 +41,16 @@ def generate_commit_message(
     Args:
         commit_type: Optional commit type (feat, fix, docs, style, refactor, perf, build, ci, test, chore, revert)
         scope: Optional scope of the change
-        repo_path: Optional path to the target git repository
+        repo_path: Optional path to the target git repository. If not provided, uses the current working directory.
 
     Returns:
         Analysis of git changes for generating conventional commit messages
     """
     try:
-        cwd = repo_path or None
+        valid_repo_path = get_valid_repo_path(repo_path)
+        if not valid_repo_path:
+            return f"Path '{repo_path or os.getcwd()}' is not a valid git repository."
+        cwd = valid_repo_path
         # Get staged changes
         diff_result = subprocess.run(
             ["git", "diff", "--cached"],
@@ -153,13 +174,16 @@ def check_git_status(repo_path: Optional[str] = None) -> str:
     Check the current git repository status.
 
     Args:
-        repo_path: Optional path to the target git repository
+        repo_path: Optional path to the target git repository. If not provided, uses the current working directory.
 
     Returns:
         Current git status including staged, unstaged, and untracked files
     """
     try:
-        cwd = repo_path or None
+        valid_repo_path = get_valid_repo_path(repo_path)
+        if not valid_repo_path:
+            return f"Path '{repo_path or os.getcwd()}' is not a valid git repository."
+        cwd = valid_repo_path
         # Get full git status
         status_result = subprocess.run(
             ["git", "status", "--porcelain"],
