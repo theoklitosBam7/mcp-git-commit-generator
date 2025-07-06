@@ -34,8 +34,8 @@ Generate conventional commit messages from your staged git changes using Model C
 
     | Approach | Steps |
     | -------- | ----- |
-    | Using `uv` | 1. Create virtual environment: `uv venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies (include dev dependencies): `uv pip install -r pyproject.toml --group dev` <br>4. Install `mcp-git-commit-generator` using the command: `uv pip install -e .`. Now, from the terminal, you can run the `mcp-git-commit-generator sse` command. |
-    | Using `pip` | 1. Create virtual environment: `python -m venv .venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment<br>3. Install dependencies (include dev dependencies): `pip install -e .[dev]`. 4. Install `mcp-git-commit-generator` using the command: `pip install -e .`. Now, from the terminal, you can run the `mcp-git-commit-generator sse` command. |
+    | Using `uv` | 1. Create virtual environment: `uv venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies (include dev dependencies): `uv pip install -r pyproject.toml --group dev` <br>4. Install `mcp-git-commit-generator` using the command: `uv pip install -e .`. <br>5. Now, from the terminal, you can run the `mcp-git-commit-generator sse` command. |
+    | Using `pip` | 1. Create virtual environment: `python -m venv .venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies (include dev dependencies): `pip install -e .`. <br>4. Install pip dev dependencies: `pip install -r requirements-dev.txt`. <br>5. Now, from the terminal, you can run the `mcp-git-commit-generator sse` command. |
 
 3. **(Optional) Install Inspector dependencies:**
 
@@ -57,7 +57,13 @@ mcp-git-commit-generator sse
 Or manually:
 
 ```sh
-python -m git_commit_generator sse
+uv run -m mcp_git_commit_generator sse
+```
+
+Or if you prefer to use Python directly:
+
+```sh
+python -m mcp_git_commit_generator sse
 ```
 
 In both cases you can specify the transport type (e.g., `sse`, `stdio`) and verbosity level (0: WARN, 1: INFO, or 2: DEBUG)
@@ -67,7 +73,7 @@ as command line arguments with default value 0. e.g.,
 mcp-git-commit-generator sse 1
 ```
 
-- The server listens on `127.0.0.1:3001` by default.
+> The server listens on `127.0.0.1:3001` by default.
 
 ### Generate a Commit Message 📝
 
@@ -95,7 +101,7 @@ From the `inspector` directory:
 npm run dev:inspector
 ```
 
-- The Inspector UI will be available at `http://localhost:5173`.
+> The Inspector UI will be available at `http://localhost:5173`.
 
 ## Tool Arguments Reference 📑
 
@@ -125,7 +131,7 @@ You can provide these arguments via your MCP client or the Inspector UI when run
 ├── pyproject.toml          # Python project configuration
 ├── uv.lock                 # Python dependencies lock file
 ├── src/                    # Python source code
-│   └── git_commit_generator/
+│   └── mcp_git_commit_generator/
 │       ├── __init__.py     # Main entry point
 │       ├── __main__.py     # (if present)
 │       └── server.py       # Main server implementation
