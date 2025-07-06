@@ -2,6 +2,7 @@
 FastMCP Server for generating conventional commit messages from git diff
 """
 
+import logging
 import os
 import subprocess
 from typing import Optional
@@ -17,8 +18,10 @@ def get_valid_repo_path(repo_path: Optional[str]) -> Optional[str]:
     Resolve and validate the git repository path.
     Returns the valid repo path if valid, otherwise None.
     """
-    print(
-        f"[get_valid_repo_path] Using current working directory: {repo_path or os.getcwd()}"
+    logger = logging.getLogger(__name__)
+    logger.info(
+        "[get_valid_repo_path] Using current working directory: %s",
+        repo_path or os.getcwd(),
     )
     if repo_path is None:
         repo_path = os.getcwd()
@@ -31,17 +34,17 @@ def get_valid_repo_path(repo_path: Optional[str]) -> Optional[str]:
 
 @mcp.tool()
 def generate_commit_message(
+    repo_path: Optional[str] = None,
     commit_type: Optional[str] = None,
     scope: Optional[str] = None,
-    repo_path: Optional[str] = None,
 ) -> str:
     """
     Generate a conventional commit message based on staged git changes.
 
     Args:
+        repo_path: Optional path to the target git repository. If not provided, uses the current working directory.
         commit_type: Optional commit type (feat, fix, docs, style, refactor, perf, build, ci, test, chore, revert)
         scope: Optional scope of the change
-        repo_path: Optional path to the target git repository. If not provided, uses the current working directory.
 
     Returns:
         Analysis of git changes for generating conventional commit messages
