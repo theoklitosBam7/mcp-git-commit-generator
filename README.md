@@ -1,23 +1,23 @@
-# MCP Git Commit Generator
+# MCP Git Commit Generator 🚀
 
 Generate conventional commit messages from your staged git changes using Model Context Protocol (MCP).
 
-## Features
+## Features ✨
 
 - **Automatic commit message generation** based on staged git diffs.
 - Supports [Conventional Commits](https://www.conventionalcommits.org/).
 - MCP server with both SSE and stdio transport options.
 - Inspector UI for interactive inspection (via MCP Inspector).
 
-## Requirements
+## Requirements 📦
 
 - [Python](https://www.python.org/) >= 3.13.5
 - [MCP CLI](https://pypi.org/project/mcp/) >= 1.10.1
+- (*Optional but recommended*) [uv](https://github.com/astral-sh/uv)
 - (*Optional*) [Node.js](https://nodejs.org/en) (for Inspector UI)
-- (*Optional - if you prefer uv*) [uv](https://github.com/astral-sh/uv)
 - (*Optional*) [Python Debugger Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy)
 
-## Installation
+## Installation 🛠️
 
 1. **Clone the repository:**
 
@@ -34,8 +34,8 @@ Generate conventional commit messages from your staged git changes using Model C
 
     | Approach | Steps |
     | -------- | ----- |
-    | Using `uv` | 1. Create virtual environment: `uv venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies (include dev dependencies): `uv pip install -r pyproject.toml --group dev` |
-    | Using `pip` | 1. Create virtual environment: `python -m venv .venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment<br>3. Install dependencies (include dev dependencies): `pip install -e .[dev]` |
+    | Using `uv` | 1. Create virtual environment: `uv venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies (include dev dependencies): `uv pip install -r pyproject.toml --group dev` <br>4. Install `mcp-git-commit-generator` using the command: `uv pip install -e .`. Now, from the terminal, you can run the `mcp-git-commit-generator sse` command. |
+    | Using `pip` | 1. Create virtual environment: `python -m venv .venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment<br>3. Install dependencies (include dev dependencies): `pip install -e .[dev]`. 4. Install `mcp-git-commit-generator` using the command: `pip install -e .`. Now, from the terminal, you can run the `mcp-git-commit-generator sse` command. |
 
 3. **(Optional) Install Inspector dependencies:**
 
@@ -44,25 +44,32 @@ Generate conventional commit messages from your staged git changes using Model C
    npm install
    ```
 
-## Usage
+## Usage ▶️
 
-### Start the MCP Server
+### Start the MCP Server 🖥️
 
-You can start the server using the provided script:
+You can start the server using the provided command:
 
 ```sh
-./start-mcp-server.sh
+mcp-git-commit-generator sse
 ```
 
 Or manually:
 
 ```sh
-python ./src/__init__.py sse
+python -m git_commit_generator sse
+```
+
+In both cases you can specify the transport type (e.g., `sse`, `stdio`) and verbosity level (0: WARN, 1: INFO, or 2: DEBUG)
+as command line arguments with default value 0. e.g.,
+
+```sh
+mcp-git-commit-generator sse 1
 ```
 
 - The server listens on `127.0.0.1:3001` by default.
 
-### Generate a Commit Message
+### Generate a Commit Message 📝
 
 1. Stage your changes:
 
@@ -73,14 +80,14 @@ python ./src/__init__.py sse
 2. Use the MCP tool to generate a commit message (see your MCP client for details).
 
    **Tool arguments:**
+   - `repo_path` (optional): Path to the target git repository (defaults to current directory).
    - `commit_type` (optional): Conventional commit type (e.g., feat, fix, docs, etc.).
    - `scope` (optional): Scope of the change (e.g., file or module name).
-   - `repo_path` (optional): Path to the target git repository (defaults to current directory).
 
    > How to provide arguments depends on your MCP client. For example, in the Inspector UI, you can enter these
    in the tool input fields.
 
-### Start the Inspector UI
+### Start the Inspector UI 🔎
 
 From the `inspector` directory:
 
@@ -90,14 +97,14 @@ npm run dev:inspector
 
 - The Inspector UI will be available at `http://localhost:5173`.
 
-## Tool Arguments Reference
+## Tool Arguments Reference 📑
 
 ### `generate_commit_message`
 
+- `repo_path` (str, optional): Path to the git repository. If omitted, uses the current directory.
 - `commit_type` (str, optional): Conventional commit type (e.g., feat, fix, docs, style, etc.).
 If omitted, the type will be auto-detected.
 - `scope` (str, optional): Scope of the change. If omitted, the scope will be auto-detected based on changed files.
-- `repo_path` (str, optional): Path to the git repository. If omitted, uses the current directory.
 
 ### `check_git_status`
 
@@ -105,28 +112,29 @@ If omitted, the type will be auto-detected.
 
 You can provide these arguments via your MCP client or the Inspector UI when running the tools.
 
-## Project Structure
+## Project Structure 🗂️
 
 ```sh
 .
 ├── .gitignore
 ├── .markdownlint.jsonc
 ├── .python-version
-├── .vscode/              # VSCode configuration
+├── .vscode/                # VSCode configuration
 ├── LICENSE
 ├── README.md
-├── pyproject.toml        # Python project configuration
-├── start-mcp-server.sh   # Script to start the MCP server
-├── uv.lock              # Python dependencies lock file
-├── src/                  # Python source code
-│   ├── __init__.py
-│   └── server.py        # Main server implementation
-└── inspector/            # Inspector related files
-    ├── package.json     # Node.js dependencies
+├── pyproject.toml          # Python project configuration
+├── uv.lock                 # Python dependencies lock file
+├── src/                    # Python source code
+│   └── git_commit_generator/
+│       ├── __init__.py     # Main entry point
+│       ├── __main__.py     # (if present)
+│       └── server.py       # Main server implementation
+└── inspector/              # Inspector related files
+    ├── package.json        # Node.js dependencies
     └── package-lock.json
 ```
 
-## How to debug the MCP Server
+## How to debug the MCP Server 🐞
 
 > Notes:
 >
@@ -140,16 +148,16 @@ arguments in the input fields to simulate real usage and debug argument handling
 | ---------- | ----------- | --------------- |
 | MCP Inspector | Debug the MCP server using the MCP Inspector. | 1. Install [Node.js](https://nodejs.org/)<br> 2. Set up Inspector: `cd inspector` && `npm install` <br> 3. Open VS Code Debug panel. Select `Debug in Inspector (Edge)` or `Debug in Inspector (Chrome)`. Press F5 to start debugging.<br> 4. When MCP Inspector launches in the browser, click the `Connect` button to connect this MCP server.<br> 5. Then you can `List Tools`, select a tool, input parameters (see arguments above), and `Run Tool` to debug your server code.<br> |
 
-## Default Ports and customizations
+## Default Ports and customizations ⚙️
 
 | Debug Mode | Ports | Definitions | Customizations | Note |
 | ---------- | ----- | ------------ | -------------- |-------------- |
 | MCP Inspector | 3001 (Server); 5173 and 3000 (Inspector) | [tasks.json](.vscode/tasks.json) | Edit [launch.json](.vscode/launch.json), [tasks.json](.vscode/tasks.json), [\_\_init\_\_.py](src/__init__.py), [mcp.json](.vscode/mcp.json) to change above ports.| N/A |
 
-## Feedback
+## Feedback 💬
 
 If you have any feedback or suggestions, please open an issue on the [MCP Git Commit Generator GitHub repository](https://github.com/theoklitosBam7/mcp-git-commit-generator/issues)
 
-## License
+## License 📄
 
 MIT License
