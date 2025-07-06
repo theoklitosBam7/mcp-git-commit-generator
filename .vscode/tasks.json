@@ -11,7 +11,7 @@
         "--listen",
         "127.0.0.1:5678",
         "-m",
-        "git_commit_generator",
+        "mcp_git_commit_generator",
         "sse"
       ],
       "isBackground": true,
