@@ -144,15 +144,15 @@ def _parse_git_status_line(line):
     Helper to parse a single git status line.
     Returns (staged_file, unstaged_file, untracked_file)
     """
-    if len(line) < 2:
+    if len(line) < 3:
         return None, None, None
     staged_status = line[0]
     unstaged_status = line[1]
     filename = line[3:]
     if staged_status == "?" and unstaged_status == "?":
         return None, None, filename
-    staged_file = f"{staged_status} {filename}" if staged_status != " " else None
-    unstaged_file = f"{unstaged_status} {filename}" if unstaged_status != " " else None
+    staged_file = filename if staged_status != " " else None
+    unstaged_file = filename if unstaged_status != " " else None
     return staged_file, unstaged_file, None
 
 
@@ -211,7 +211,7 @@ def check_git_status(repo_path: Optional[str] = None) -> str:
             return f"Repository is clean on branch '{current_branch}'. No changes to commit."
 
         # Parse status using helper
-        status_lines = status_result.stdout.strip().split("\n")
+        status_lines = [line for line in status_result.stdout.split("\n") if line]
         staged_files, unstaged_files, untracked_files = _parse_git_status_lines(
             status_lines
         )
