@@ -238,6 +238,7 @@ name = "mcp-git-commit-generator"
 version = "1.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "click" },
     { name = "mcp", extra = ["cli"] },
 ]
 
@@ -248,7 +249,10 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "mcp", extras = ["cli"], specifier = ">=1.10.1" }]
+requires-dist = [
+    { name = "click", specifier = ">=8.2.1" },
+    { name = "mcp", extras = ["cli"], specifier = ">=1.10.1" },
+]
 
 [package.metadata.requires-dev]
 dev = [
