@@ -6,7 +6,7 @@ Generate conventional commit messages from your staged git changes using Model C
 
 - **Automatic commit message generation** based on staged git diffs.
 - Supports [Conventional Commits](https://www.conventionalcommits.org/).
-- MCP server with both SSE and stdio transport options.
+- MCP server with both stdio (default) and SSE transport options.
 - Inspector UI for interactive inspection (via MCP Inspector).
 
 ## Requirements 📦
@@ -63,36 +63,37 @@ for dependency management and runs the server as a non-root user for security.
 docker build -t mcp-git-commit-generator .
 ```
 
-### Run the server in a container
+### Run the server in a container (default: stdio transport)
+
+```sh
+docker run -d \
+  --name mcp-git-commit-generator \
+  mcp-git-commit-generator
+```
+
+By default, the container runs:
+
+```sh
+mcp-git-commit-generator --transport stdio
+```
+
+If you want to use SSE transport (for Inspector UI or remote access), override the entrypoint or run manually:
 
 ```sh
 docker run -d \
   --name mcp-git-commit-generator \
   -p 3001:3001 \
-  mcp-git-commit-generator
+  --entrypoint mcp-git-commit-generator \
+  mcp-git-commit-generator --transport sse --host 0.0.0.0 --port 3001
 ```
 
-The default entrypoint runs:
-
-```sh
-mcp-git-commit-generator --transport sse --host 0.0.0.0 --port 3001
-```
-
-The server will be available at `http://localhost:3001`.
-To override the port or other arguments, pass them after the image name:
-
-```sh
-docker run -d \
-   --name mcp-git-commit-generator \
-   -p 4000:4000 \
-   mcp-git-commit-generator --transport sse --host 0.0.0.0 --port 4000
-```
+The server will be available at `http://localhost:3001` when using SSE.
 
 ---
 
 ## Usage ▶️
 
-> If you run the server using Docker, you can skip the steps below and use the Docker container directly.
+> If you run the server using Docker, you can use the default stdio transport, or override to SSE as shown above.
 
 ### Start the MCP Server 🖥️
 
@@ -105,32 +106,52 @@ docker run -d \
 1. Set up your uv or Python environment as described in the Installation section.
 2. From the project root, run:
 
+  <details>
+  <summary>mcp-git-commit-generator</summary>
+
    ```sh
-   # If you have mcp-git-commit-generator installed in your environment
+   # If you have mcp-git-commit-generator installed in your environment (default: stdio)
+   mcp-git-commit-generator
+   ```
+
+  </details>
+
+  <details>
+  <summary>mcp-git-commit-generator with SSE transport</summary>
+
+   ```sh
    mcp-git-commit-generator --transport sse
    ```
 
-   or:
+  </details>
+
+  <details>
+  <summary>Using uv</summary>
 
    ```sh
-   # Using uv
    uv run -m mcp_git_commit_generator --transport sse
    ```
 
-   or:
+  </details>
+
+  <details>
+  <summary>Using Python directly</summary>
 
    ```sh
-   # Using Python directly
    python -m mcp_git_commit_generator --transport sse
    ```
 
-   You can specify other options, for example (*the same in all commands above*):
+  </details>
+
+  <br/>
+
+  You can specify other options, for example:
 
    ```sh
    python -m mcp_git_commit_generator --transport sse --host 0.0.0.0 --port 3001 -v
    ```
 
-   > The server listens on `0.0.0.0:3001` by default when using Docker, or as specified by the options above.
+   > The server listens on `0.0.0.0:3001` by default when using SSE, or as specified by the options above.
 
 **Note:**
 
@@ -138,7 +159,7 @@ docker run -d \
 - Do not use positional arguments (e.g., `python -m mcp_git_commit_generator sse`);
 always use options like `--transport sse`.
 - Available arguments with their values are:
-  - `--transport`: Transport type (e.g., `sse`, `stdio`. default: `stdio`).
+  - `--transport`: Transport type (e.g., `stdio` (default), `sse`).
   - `--host`: Host to bind the server (default: `0.0.0.0`).
   - `--port`: Port to bind the server (default: `3001`).
   - `-v`, `--verbose`: Verbosity level (e.g., `-v`, `-vv`).
@@ -190,6 +211,7 @@ You can provide these arguments via your MCP client or the Inspector UI when run
 
 ```sh
 .
+├── .github/                # GitHub workflows and issue templates
 ├── .gitignore
 ├── .markdownlint.jsonc
 ├── .python-version
@@ -197,11 +219,14 @@ You can provide these arguments via your MCP client or the Inspector UI when run
 ├── LICENSE
 ├── README.md
 ├── pyproject.toml          # Python project configuration
+├── requirements-dev.txt    # Development dependencies
 ├── uv.lock                 # Python dependencies lock file
+├── Dockerfile              # Docker build file
+├── build/                  # Build artifacts
 ├── src/                    # Python source code
 │   └── mcp_git_commit_generator/
 │       ├── __init__.py     # Main entry point
-│       ├── __main__.py     # (if present)
+│       ├── __main__.py     # CLI entry point
 │       └── server.py       # Main server implementation
 └── inspector/              # Inspector related files
     ├── package.json        # Node.js dependencies
@@ -212,13 +237,24 @@ You can provide these arguments via your MCP client or the Inspector UI when run
 
 The `.vscode/mcp.json` file configures how VS Code and related tools connect to your MCP Git Commit Generator server.
 This file defines available server transports and their connection details, making it easy to switch between
-different modes (SSE or stdio) for development and debugging.
+different modes (stdio is default, SSE is optional) for development and debugging.
 
 ### Example `mcp.json`
 
 ```jsonc
 {
   "servers": {
+    "mcp-git-commit-generator": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--mount",
+        "type=bind,src=${userHome},dst=${userHome}",
+        "mcp-git-commit-generator"
+      ]
+    },
     "sse-mcp-git-commit-generator": {
       "type": "sse",
       "url": "http://localhost:3001/sse"
@@ -232,10 +268,11 @@ different modes (SSE or stdio) for development and debugging.
 }
 ```
 
+- **mcp-git-commit-generator**: Runs the server in a Docker container (default: stdio transport).
 - **sse-mcp-git-commit-generator**: Connects to the MCP server using Server-Sent Events (SSE) at `http://localhost:3001/sse`.
-This is the default when running the server with Docker or directly with the `--transport sse` option.
+Only useful if you run the server with `--transport sse`.
 - **stdio-mcp-git-commit-generator**: Connects using standard input/output (stdio), running the server as a subprocess.
-This is useful for local development and debugging.
+This is the default and recommended for local development and debugging.
 
 You can add or modify server entries as needed for your workflow. For more information on available transports and arguments,
 see the [Usage](#usage-️) section above.
@@ -258,7 +295,7 @@ arguments in the input fields to simulate real usage and debug argument handling
 
 | Debug Mode | Ports | Definitions | Customizations | Note |
 | ---------- | ----- | ------------ | -------------- |-------------- |
-| MCP Inspector | 3001 (Server); 5173 and 3000 (Inspector) | [tasks.json](.vscode/tasks.json) | Edit [launch.json](.vscode/launch.json), [tasks.json](.vscode/tasks.json), [\_\_init\_\_.py](src/__init__.py), [mcp.json](.vscode/mcp.json) to change above ports.| N/A |
+| MCP Inspector | 3001 (Server, SSE only); 5173 and 3000 (Inspector) | [tasks.json](.vscode/tasks.json) | Edit [launch.json](.vscode/launch.json), [tasks.json](.vscode/tasks.json), [\_\_init\_\_.py](src/__init__.py), [mcp.json](.vscode/mcp.json) to change above ports.| N/A |
 
 ## Feedback 💬
 

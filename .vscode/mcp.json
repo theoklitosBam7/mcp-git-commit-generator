@@ -1,5 +1,16 @@
 {
   "servers": {
+    "mcp-git-commit-generator": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--mount",
+        "type=bind,src=${userHome},dst=${userHome}",
+        "mcp-git-commit-generator"
+      ]
+    },
     "sse-mcp-git-commit-generator": {
       "type": "sse",
       "url": "http://localhost:3001/sse"

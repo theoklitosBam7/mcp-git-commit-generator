@@ -29,8 +29,8 @@ FROM python:3.13-slim-bookworm
 
 WORKDIR /app
 
-# Set non-root user for security before copying files
-RUN adduser --disabled-password --gecos '' --uid 1000 appuser
+RUN apt-get update && apt-get install -y git && rm -rf /var/lib/apt/lists/* \
+    && adduser --disabled-password --gecos '' --uid 1000 appuser
 COPY --from=uv --chown=appuser:appuser /app/.venv /app/.venv
 
 ENV PATH="/app/.venv/bin:$PATH"
@@ -39,4 +39,4 @@ ENV PYTHONUNBUFFERED=1
 RUN chown -R appuser:appuser /app
 USER appuser
 
-ENTRYPOINT ["mcp-git-commit-generator", "--transport", "sse", "--host", "0.0.0.0", "--port", "3001"]
+ENTRYPOINT ["mcp-git-commit-generator", "--transport", "stdio"]
