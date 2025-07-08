@@ -9,9 +9,10 @@
         "-m",
         "debugpy",
         "--listen",
-        "127.0.0.1:5678",
+        "localhost:5678",
         "-m",
         "mcp_git_commit_generator",
+        "--transport",
         "sse"
       ],
       "isBackground": true,

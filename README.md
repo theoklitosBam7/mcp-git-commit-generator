@@ -11,11 +11,16 @@ Generate conventional commit messages from your staged git changes using Model C
 
 ## Requirements 📦
 
+- [Docker](https://www.docker.com/) (for running the server in a container)
+- [Git](https://git-scm.com/) (for version control)
+
+If you prefer not to use Docker, you can run the server locally without it.
+
 - [Python](https://www.python.org/) >= 3.13.5
 - [MCP CLI](https://pypi.org/project/mcp/) >= 1.10.1
-- (*Optional but recommended*) [uv](https://github.com/astral-sh/uv)
-- (*Optional*) [Node.js](https://nodejs.org/en) (for Inspector UI)
-- (*Optional*) [Python Debugger Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy)
+- [uv](https://github.com/astral-sh/uv) (for dependency management, optional but recommended)
+- [Node.js](https://nodejs.org/en) (for Inspector UI, optional)
+- [Python Debugger Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy) (for debugging, optional)
 
 ## Installation 🛠️
 
@@ -26,7 +31,7 @@ Generate conventional commit messages from your staged git changes using Model C
    cd mcp-git-commit-generator
    ```
 
-2. **Prepare environment**
+2. **Prepare environment (without Docker)**
 
     There are two approaches to set up the environment for this project. You can choose either one based on your preference.
 
@@ -34,8 +39,8 @@ Generate conventional commit messages from your staged git changes using Model C
 
     | Approach | Steps |
     | -------- | ----- |
-    | Using `uv` | 1. Create virtual environment: `uv venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies (include dev dependencies): `uv pip install -r pyproject.toml --group dev` <br>4. Install `mcp-git-commit-generator` using the command: `uv pip install -e .`. <br>5. Now, from the terminal, you can run the `mcp-git-commit-generator sse` command. |
-    | Using `pip` | 1. Create virtual environment: `python -m venv .venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies (include dev dependencies): `pip install -e .`. <br>4. Install pip dev dependencies: `pip install -r requirements-dev.txt`. <br>5. Now, from the terminal, you can run the `mcp-git-commit-generator sse` command. |
+    | Using `uv` | 1. Create virtual environment: `uv venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies (include dev dependencies): `uv pip install -r pyproject.toml --group dev` <br>4. Install `mcp-git-commit-generator` using the command: `uv pip install -e .`. |
+    | Using `pip` | 1. Create virtual environment: `python -m venv .venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies: `pip install -e .`. <br>4. Install pip dev dependencies: `pip install -r requirements-dev.txt`. |
 
 3. **(Optional) Install Inspector dependencies:**
 
@@ -44,36 +49,99 @@ Generate conventional commit messages from your staged git changes using Model C
    npm install
    ```
 
+---
+
+## Run with Docker 🐳
+
+You can build and run the MCP Git Commit Generator using Docker. The provided Dockerfile uses a multi-stage build
+with [`uv`](https://github.com/astral-sh/uv)
+for dependency management and runs the server as a non-root user for security.
+
+### Build the Docker image
+
+```sh
+docker build -t mcp-git-commit-generator .
+```
+
+### Run the server in a container
+
+```sh
+docker run -d \
+  --name mcp-git-commit-generator \
+  -p 3001:3001 \
+  mcp-git-commit-generator
+```
+
+The default entrypoint runs:
+
+```sh
+mcp-git-commit-generator --transport sse --host 0.0.0.0 --port 3001
+```
+
+The server will be available at `http://localhost:3001`.
+To override the port or other arguments, pass them after the image name:
+
+```sh
+docker run -d \
+   --name mcp-git-commit-generator \
+   -p 4000:4000 \
+   mcp-git-commit-generator --transport sse --host 0.0.0.0 --port 4000
+```
+
+---
+
 ## Usage ▶️
+
+> If you run the server using Docker, you can skip the steps below and use the Docker container directly.
 
 ### Start the MCP Server 🖥️
 
-You can start the server using the provided command:
+**Recommended (no install required):**
 
-```sh
-mcp-git-commit-generator sse
-```
+- Use Docker as described above.
 
-Or manually:
+**To run locally (without Docker):**
 
-```sh
-uv run -m mcp_git_commit_generator sse
-```
+1. Set up your uv or Python environment as described in the Installation section.
+2. From the project root, run:
 
-Or if you prefer to use Python directly:
+   ```sh
+   # If you have mcp-git-commit-generator installed in your environment
+   mcp-git-commit-generator --transport sse
+   ```
 
-```sh
-python -m mcp_git_commit_generator sse
-```
+   or:
 
-In both cases you can specify the transport type (e.g., `sse`, `stdio`) and verbosity level (0: WARN, 1: INFO, or 2: DEBUG)
-as command line arguments with default value 0. e.g.,
+   ```sh
+   # Using uv
+   uv run -m mcp_git_commit_generator --transport sse
+   ```
 
-```sh
-mcp-git-commit-generator sse 1
-```
+   or:
 
-> The server listens on `127.0.0.1:3001` by default.
+   ```sh
+   # Using Python directly
+   python -m mcp_git_commit_generator --transport sse
+   ```
+
+   You can specify other options, for example (*the same in all commands above*):
+
+   ```sh
+   python -m mcp_git_commit_generator --transport sse --host 0.0.0.0 --port 3001 -v
+   ```
+
+   > The server listens on `0.0.0.0:3001` by default when using Docker, or as specified by the options above.
+
+**Note:**
+
+- If you want to use the CLI entrypoint, ensure the package is installed and your environment is activated.
+- Do not use positional arguments (e.g., `python -m mcp_git_commit_generator sse`);
+always use options like `--transport sse`.
+- Available arguments with their values are:
+  - `--transport`: Transport type (e.g., `sse`, `stdio`. default: `stdio`).
+  - `--host`: Host to bind the server (default: `0.0.0.0`).
+  - `--port`: Port to bind the server (default: `3001`).
+  - `-v`, `--verbose`: Verbosity level (e.g., `-v`, `-vv`).
 
 ### Generate a Commit Message 📝
 
@@ -139,6 +207,38 @@ You can provide these arguments via your MCP client or the Inspector UI when run
     ├── package.json        # Node.js dependencies
     └── package-lock.json
 ```
+
+## MCP Server Configuration (`mcp.json`) ⚙️
+
+The `.vscode/mcp.json` file configures how VS Code and related tools connect to your MCP Git Commit Generator server.
+This file defines available server transports and their connection details, making it easy to switch between
+different modes (SSE or stdio) for development and debugging.
+
+### Example `mcp.json`
+
+```jsonc
+{
+  "servers": {
+    "sse-mcp-git-commit-generator": {
+      "type": "sse",
+      "url": "http://localhost:3001/sse"
+    },
+    "stdio-mcp-git-commit-generator": {
+      "type": "stdio",
+      "command": "${command:python.interpreterPath}",
+      "args": ["-m", "mcp_git_commit_generator", "--transport", "stdio"]
+    }
+  }
+}
+```
+
+- **sse-mcp-git-commit-generator**: Connects to the MCP server using Server-Sent Events (SSE) at `http://localhost:3001/sse`.
+This is the default when running the server with Docker or directly with the `--transport sse` option.
+- **stdio-mcp-git-commit-generator**: Connects using standard input/output (stdio), running the server as a subprocess.
+This is useful for local development and debugging.
+
+You can add or modify server entries as needed for your workflow. For more information on available transports and arguments,
+see the [Usage](#usage-️) section above.
 
 ## How to debug the MCP Server 🐞
 

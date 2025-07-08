@@ -5,14 +5,33 @@ import os
 import sys
 from typing import Literal, cast
 
+import click
+
 from .server import mcp
 
 
-def main():
+@click.command()
+@click.option(
+    "--transport",
+    default="stdio",
+    type=click.Choice(["stdio", "sse"]),
+    help="Transport type (stdio or sse)",
+)
+@click.option("--host", default="0.0.0.0", help="Host to listen on (for sse)")
+@click.option("--port", default=3001, type=int, help="Port to listen on (for sse)")
+@click.option(
+    "-v",
+    "--verbose",
+    count=True,
+    help="Verbosity level, use -v or -vv",
+)
+def main(
+    transport,
+    host,
+    port,
+    verbose,
+):
     """Main function to run the MCP server with specified transport type."""
-    transport_type = sys.argv[1] if len(sys.argv) > 1 else None
-    verbose = int(sys.argv[2]) if len(sys.argv) > 2 else 0
-
     logging_level = logging.WARN
     if verbose == 1:
         logging_level = logging.INFO
@@ -23,7 +42,7 @@ def main():
     logger = logging.getLogger(__name__)
     logger.info(
         "Starting MCP server with transport type: %s, verbosity level: %d",
-        transport_type,
+        transport,
         verbose,
     )
 
@@ -35,12 +54,11 @@ def main():
     mcp.settings.log_level = (
         env_log_level if env_log_level in allowed_levels else "DEBUG"
     )
-    if transport_type == "sse":
-        port = int(os.environ.get("PORT", 3001))
+    if transport == "sse":
         mcp.settings.port = port
-        mcp.settings.host = "127.0.0.1"
+        mcp.settings.host = host
         mcp.run(transport="sse")
-    elif transport_type == "stdio":
+    elif transport == "stdio":
         mcp.run(transport="stdio")
     else:
         logger.error("Invalid transport type. Use 'sse' or 'stdio'.")
@@ -48,4 +66,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(transport="stdio", host=None, port=None, verbose=False)

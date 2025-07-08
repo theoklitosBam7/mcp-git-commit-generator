@@ -1,8 +1,13 @@
 {
-    "servers": {
-        "mcp-git-commit-generator": {
-            "url": "http://localhost:3001/sse",
-            "type": "sse"
-        }
+  "servers": {
+    "sse-mcp-git-commit-generator": {
+      "type": "sse",
+      "url": "http://localhost:3001/sse"
+    },
+    "stdio-mcp-git-commit-generator": {
+      "type": "stdio",
+      "command": "${command:python.interpreterPath}",
+      "args": ["-m", "mcp_git_commit_generator", "--transport", "stdio"]
     }
+  }
 }
