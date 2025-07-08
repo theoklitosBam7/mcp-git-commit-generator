@@ -8,7 +8,7 @@
         "--rm",
         "--mount",
         "type=bind,src=${userHome},dst=${userHome}",
-        "mcp-git-commit-generator"
+        "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
       ]
     },
     "sse-mcp-git-commit-generator": {

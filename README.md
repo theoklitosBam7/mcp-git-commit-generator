@@ -65,10 +65,12 @@ docker build -t mcp-git-commit-generator .
 
 ### Run the server in a container (default: stdio transport)
 
+You can run the published image directly from GitHub Container Registry.
+
 ```sh
 docker run -d \
   --name mcp-git-commit-generator \
-  mcp-git-commit-generator
+  ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest
 ```
 
 By default, the container runs:
@@ -84,7 +86,15 @@ docker run -d \
   --name mcp-git-commit-generator \
   -p 3001:3001 \
   --entrypoint mcp-git-commit-generator \
-  mcp-git-commit-generator --transport sse --host 0.0.0.0 --port 3001
+  ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest --transport sse --host 0.0.0.0 --port 3001
+```
+
+Or, to match the VS Code `.vscode/mcp.json` configuration and mount your home directory:
+
+```sh
+docker run -i --rm \
+  --mount type=bind,src=$HOME,dst=$HOME \
+  ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest
 ```
 
 The server will be available at `http://localhost:3001` when using SSE.
@@ -252,7 +262,7 @@ different modes (stdio is default, SSE is optional) for development and debuggin
         "--rm",
         "--mount",
         "type=bind,src=${userHome},dst=${userHome}",
-        "mcp-git-commit-generator"
+        "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
       ]
     },
     "sse-mcp-git-commit-generator": {
@@ -268,7 +278,7 @@ different modes (stdio is default, SSE is optional) for development and debuggin
 }
 ```
 
-- **mcp-git-commit-generator**: Runs the server in a Docker container (default: stdio transport).
+- **mcp-git-commit-generator**: Runs the server in a Docker container (default: stdio transport), using the published image.
 - **sse-mcp-git-commit-generator**: Connects to the MCP server using Server-Sent Events (SSE) at `http://localhost:3001/sse`.
 Only useful if you run the server with `--transport sse`.
 - **stdio-mcp-git-commit-generator**: Connects using standard input/output (stdio), running the server as a subprocess.
