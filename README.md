@@ -13,8 +13,187 @@ Generate conventional commit messages from your staged git changes using Model C
 
 - [Docker](https://www.docker.com/) (for running the server in a container)
 - [Git](https://git-scm.com/) (for version control)
+- An MCP-compatible client (VS Code with MCP extension, Claude Desktop, Cursor, Windsurf, etc.)
 
-If you prefer not to use Docker, you can run the server locally without it.
+## Available Tools 🛠️
+
+This MCP server provides the following tools to help you generate conventional commit messages:
+
+### `generate_commit_message`
+
+Generates a conventional commit message based on your staged git changes.
+
+**Parameters:**
+
+- `repo_path` (string, optional): Path to the git repository. If omitted, uses the current directory.
+- `commit_type` (string, optional): Conventional commit type (e.g., `feat`, `fix`, `docs`, `style`, `refactor`,
+  `perf`, `build`, `ci`, `test`, `chore`, `revert`). If omitted, the type will be auto-detected.
+- `scope` (string, optional): Scope of the change (e.g., file or module name). If omitted, the scope will be
+  auto-detected based on changed files.
+
+**Usage:**
+
+1. Stage your changes: `git add <files>`
+2. Use the tool through your MCP client to generate a commit message
+3. The tool will analyze your staged changes and generate an appropriate conventional commit message
+
+### `check_git_status`
+
+Checks the current git repository status, including staged, unstaged, and untracked files.
+
+**Parameters:**
+
+- `repo_path` (string, optional): Path to the git repository. If omitted, uses the current directory.
+
+**Usage:**
+
+Use this tool to get an overview of your current git repository state before generating commit messages.
+
+## MCP Client Configuration 🧩
+
+Configure the MCP Git Commit Generator in your favorite MCP client using the Docker image from GitHub Container Registry.
+
+### VS Code
+
+Add the following configuration to your VS Code `mcp.json` file (usually located at `.vscode/mcp.json` in your workspace):
+
+```jsonc
+{
+  "servers": {
+    "mcp-git-commit-generator": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--mount",
+        "type=bind,src=${userHome},dst=${userHome}",
+        "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
+      ]
+    }
+  }
+}
+```
+
+If you want to put the configuration to your user `settings.json` file, you can do so by adding:
+
+```jsonc
+{
+  "mcp": {
+    "servers": {
+      "mcp-git-commit-generator": {
+        "command": "docker",
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "--mount",
+          "type=bind,src=${userHome},dst=${userHome}",
+          "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
+        ]
+      }
+    }
+  }
+}
+```
+
+### Cursor
+
+Add the following to your Cursor MCP configuration file (usually located at `~/.cursor/mcp.json`):
+
+```jsonc
+{
+  "mcpServers": {
+    "mcp-git-commit-generator": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--mount",
+        "type=bind,src=${userHome},dst=${userHome}",
+        "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
+      ]
+    }
+  }
+}
+```
+
+### Windsurf
+
+Configure Windsurf with the following MCP server settings (usually located at `~/.codeium/windsurf/mcp_config.json`):
+
+```jsonc
+{
+    "mcpServers": {
+      "mcp-git-commit-generator": {
+        "command": "docker",
+        "args": [
+          "run",
+          "-i",
+          "--rm",
+          "--mount",
+          "type=bind,src=${userHome},dst=${userHome}",
+          "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
+        ]
+      }
+    }
+}
+```
+
+### Claude Desktop
+
+Add the following to your Claude Desktop configuration file (usually located at
+`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
+
+```jsonc
+{
+  "mcpServers": {
+    "mcp-git-commit-generator": {
+      "command": "docker",
+      "args": [
+        "run",
+        "-i",
+        "--rm",
+        "--mount",
+        "type=bind,src=${userHome},dst=${userHome}",
+        "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
+      ]
+    }
+  }
+}
+```
+
+> **Note**: The `--mount` option allows the Docker container to access your home directory, enabling it to work
+> with git repositories located anywhere in your file system. Adjust the mount path if your repositories are
+> located elsewhere.
+
+## Quick Start Guide 🚀
+
+1. **Install Docker** if you haven't already
+2. **Configure your MCP client** using one of the configurations above
+3. **Stage some changes** in a git repository:
+
+   ```sh
+   git add <files>
+   ```
+
+4. **Use the tools** through your MCP client:
+   - Use `check_git_status` to see your current repository state
+   - Use `generate_commit_message` to create a conventional commit message
+5. **Commit your changes** with the generated message
+
+---
+
+## Developer Guidelines 👨‍💻
+
+The following sections are intended for developers who want to contribute to or modify the MCP Git Commit Generator.
+
+### Local Development Setup 🛠️
+
+If you prefer not to use Docker for development, you can run the server locally:
+
+**Requirements:**
 
 - [Python](https://www.python.org/) >= 3.13.5
 - [MCP CLI](https://pypi.org/project/mcp/) >= 1.10.1
@@ -22,7 +201,7 @@ If you prefer not to use Docker, you can run the server locally without it.
 - [Node.js](https://nodejs.org/en) (for Inspector UI, optional)
 - [Python Debugger Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy) (for debugging, optional)
 
-## Installation 🛠️
+**Installation:**
 
 1. **Clone the repository:**
 
@@ -31,7 +210,7 @@ If you prefer not to use Docker, you can run the server locally without it.
    cd mcp-git-commit-generator
    ```
 
-2. **Prepare environment (without Docker)**
+2. **Prepare environment:**
 
     There are two approaches to set up the environment for this project. You can choose either one based on your preference.
 
@@ -49,21 +228,18 @@ If you prefer not to use Docker, you can run the server locally without it.
    npm install
    ```
 
----
-
-## Run with Docker 🐳
+### Building and Running with Docker 🐳
 
 You can build and run the MCP Git Commit Generator using Docker. The provided Dockerfile uses a multi-stage build
-with [`uv`](https://github.com/astral-sh/uv)
-for dependency management and runs the server as a non-root user for security.
+with [`uv`](https://github.com/astral-sh/uv) for dependency management and runs the server as a non-root user for security.
 
-### Build the Docker image
+#### Build the Docker image
 
 ```sh
 docker build -t mcp-git-commit-generator .
 ```
 
-### Run the server in a container (default: stdio transport)
+#### Run the server in a container (default: stdio transport)
 
 You can run the published image directly from GitHub Container Registry.
 
@@ -89,31 +265,13 @@ docker run -d \
   ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest --transport sse --host 0.0.0.0 --port 3001
 ```
 
-Or, to match the VS Code `.vscode/mcp.json` configuration and mount your home directory:
-
-```sh
-docker run -i --rm \
-  --mount type=bind,src=$HOME,dst=$HOME \
-  ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest
-```
-
 The server will be available at `http://localhost:3001` when using SSE.
 
----
-
-## Usage ▶️
-
-> If you run the server using Docker, you can use the default stdio transport, or override to SSE as shown above.
-
-### Start the MCP Server 🖥️
-
-**Recommended (no install required):**
-
-- Use Docker as described above.
+### Running the Server Locally 🖥️
 
 **To run locally (without Docker):**
 
-1. Set up your uv or Python environment as described in the Installation section.
+1. Set up your uv or Python environment as described in the Local Development Setup section.
 2. From the project root, run:
 
   <details>
@@ -174,24 +332,6 @@ always use options like `--transport sse`.
   - `--port`: Port to bind the server (default: `3001`).
   - `-v`, `--verbose`: Verbosity level (e.g., `-v`, `-vv`).
 
-### Generate a Commit Message 📝
-
-1. Stage your changes:
-
-   ```sh
-   git add <files>
-   ```
-
-2. Use the MCP tool to generate a commit message (see your MCP client for details).
-
-   **Tool arguments:**
-   - `repo_path` (optional): Path to the target git repository (defaults to current directory).
-   - `commit_type` (optional): Conventional commit type (e.g., feat, fix, docs, etc.).
-   - `scope` (optional): Scope of the change (e.g., file or module name).
-
-   > How to provide arguments depends on your MCP client. For example, in the Inspector UI, you can enter these
-   in the tool input fields.
-
 ### Start the Inspector UI 🔎
 
 From the `inspector` directory:
@@ -202,22 +342,7 @@ npm run dev:inspector
 
 > The Inspector UI will be available at `http://localhost:5173`.
 
-## Tool Arguments Reference 📑
-
-### `generate_commit_message`
-
-- `repo_path` (str, optional): Path to the git repository. If omitted, uses the current directory.
-- `commit_type` (str, optional): Conventional commit type (e.g., feat, fix, docs, style, etc.).
-If omitted, the type will be auto-detected.
-- `scope` (str, optional): Scope of the change. If omitted, the scope will be auto-detected based on changed files.
-
-### `check_git_status`
-
-- `repo_path` (str, optional): Path to the git repository. If omitted, uses the current directory.
-
-You can provide these arguments via your MCP client or the Inspector UI when running the tools.
-
-## Project Structure 🗂️
+### Project Structure 🗂️
 
 ```sh
 .
@@ -243,13 +368,13 @@ You can provide these arguments via your MCP client or the Inspector UI when run
     └── package-lock.json
 ```
 
-## MCP Server Configuration (`mcp.json`) ⚙️
+### Advanced MCP Server Configuration for Development ⚙️
 
 The `.vscode/mcp.json` file configures how VS Code and related tools connect to your MCP Git Commit Generator server.
 This file defines available server transports and their connection details, making it easy to switch between
 different modes (stdio is default, SSE is optional) for development and debugging.
 
-### Example `mcp.json`
+#### Example Development `mcp.json`
 
 ```jsonc
 {
@@ -284,10 +409,7 @@ Only useful if you run the server with `--transport sse`.
 - **stdio-mcp-git-commit-generator**: Connects using standard input/output (stdio), running the server as a subprocess.
 This is the default and recommended for local development and debugging.
 
-You can add or modify server entries as needed for your workflow. For more information on available transports and arguments,
-see the [Usage](#usage-️) section above.
-
-## How to debug the MCP Server 🐞
+### Debugging the MCP Server 🐞
 
 > Notes:
 >
@@ -301,7 +423,7 @@ arguments in the input fields to simulate real usage and debug argument handling
 | ---------- | ----------- | --------------- |
 | MCP Inspector | Debug the MCP server using the MCP Inspector. | 1. Install [Node.js](https://nodejs.org/)<br> 2. Set up Inspector: `cd inspector` && `npm install` <br> 3. Open VS Code Debug panel. Select `Debug in Inspector (Edge)` or `Debug in Inspector (Chrome)`. Press F5 to start debugging.<br> 4. When MCP Inspector launches in the browser, click the `Connect` button to connect this MCP server.<br> 5. Then you can `List Tools`, select a tool, input parameters (see arguments above), and `Run Tool` to debug your server code.<br> |
 
-## Default Ports and customizations ⚙️
+### Default Ports and Customizations ⚙️
 
 | Debug Mode | Ports | Definitions | Customizations | Note |
 | ---------- | ----- | ------------ | -------------- |-------------- |
