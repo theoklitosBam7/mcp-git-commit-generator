@@ -1,6 +1,6 @@
 [project]
 name = "mcp-git-commit-generator"
-version = "2.0.1"
+version = "2.0.2"
 description = "Generate conventional commit messages from your staged git changes using Model Context Protocol (MCP)."
 authors = [{ name = "Theoklitos Bampouris", email = "th.bampouris@gmail.com" }]
 license = { text = "MIT" }
@@ -17,6 +17,10 @@ keywords = [
 ]
 readme = "README.md"
 requires-python = ">=3.13.5"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
 dependencies = ["click>=8.2.1", "mcp[cli]>=1.10.1"]
 
 [dependency-groups]
@@ -24,3 +28,11 @@ dev = ["debugpy>=1.8.14", "pre-commit>=4.2.0"]
 
 [project.scripts]
 mcp-git-commit-generator = "mcp_git_commit_generator:main"
+
+[project.urls]
+Homepage = "https://github.com/theoklitosBam7/mcp-git-commit-generator"
+Issues = "https://github.com/theoklitosBam7/mcp-git-commit-generator/issues"
+
+[build-system]
+requires = ["uv_build >= 0.7.19, <0.9.0"]
+build-backend = "uv_build"
