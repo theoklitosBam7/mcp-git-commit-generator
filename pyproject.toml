@@ -1,6 +1,6 @@
 [project]
 name = "mcp-git-commit-generator"
-version = "2.0.2"
+version = "2.0.3"
 description = "Generate conventional commit messages from your staged git changes using Model Context Protocol (MCP)."
 authors = [{ name = "Theoklitos Bampouris", email = "th.bampouris@gmail.com" }]
 license = { text = "MIT" }
