@@ -235,8 +235,8 @@ cli = [
 
 [[package]]
 name = "mcp-git-commit-generator"
-version = "2.0.1"
-source = { virtual = "." }
+version = "2.0.2"
+source = { editable = "." }
 dependencies = [
     { name = "click" },
     { name = "mcp", extra = ["cli"] },
