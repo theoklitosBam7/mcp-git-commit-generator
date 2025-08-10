@@ -4,88 +4,65 @@
 
 This MCP server generates conventional commit messages from staged git changes. It exposes two main MCP tools:
 
-- `generate_commit_message`: Analyzes staged changes and generates a commit message (type/scope can be auto-detected or provided)
-- `check_git_status`: Reports staged, unstaged, and untracked files
+- `generate_commit_message`: Analyzes staged changes and generates a conventional commit message. Commit type and scope can be auto-detected or provided.
+- `check_git_status`: Reports staged, unstaged, and untracked files with clear validation of the git repository path.
 
 ## Architecture & Key Files
 
-- `src/mcp_git_commit_generator/server.py`: Implements MCP tools with `@mcp.tool()` and all commit message logic
-- `src/mcp_git_commit_generator/__init__.py`: CLI entrypoint using Click; always use `--option value` (never positional args)
-- `src/mcp_git_commit_generator/__main__.py`: Simple module launcher
-- `inspector/`: Inspector UI (Node.js, optional for debugging and tool testing)
+- **Server Logic**: All commit message logic and MCP tools are defined in `src/mcp_git_commit_generator/server.py` using the `@mcp.tool()` decorator. This includes helper functions like `get_valid_repo_path` and robust error handling with `subprocess.run` for git operations.
+- **CLI Entrypoint**: The CLI is handled via `src/mcp_git_commit_generator/__init__.py`, which enforces using `--option value` for all command-line arguments.
+- **Module Launcher**: Bootstrapping of the server is done through `src/mcp_git_commit_generator/__main__.py`.
+- **Inspector UI**: Located in the `inspector/` directory, this Node.js-based tool aids in debugging and interactive testing of MCP tools (accessible via `npm run dev:inspector`).
 
-Transport options:
-
-- `stdio` (default, for CLI/MCP clients)
-- `sse` (for Inspector UI/web clients)
-
-## Developer Workflow
+## Developer Workflow & Commands
 
 ### Environment Setup
 
-- Recommended: `uv venv`, `uv pip install -r pyproject.toml --group dev`, `uv pip install -e .`
-- Or: `python -m venv .venv`, `pip install -e .`, `pip install -r requirements-dev.txt`
+- Recommended: Create a virtual environment using `uv venv` then install development requirements with:
+  - `uv pip install -r pyproject.toml --group dev`
+  - `uv pip install -e .`
+- Alternatively:
+  - `python -m venv .venv`
+  - `pip install -e . && pip install -r requirements-dev.txt`
 
 ### Running & Debugging
 
-- Start server: `mcp-git-commit-generator [--transport sse] [--host ...] [--port ...] [-v]`
-- VS Code tasks:
-  - **Start MCP Server**: Debug server on port 5678 (SSE transport)
-  - **Start MCP Inspector**: Launches Inspector UI (depends on server)
-- Inspector UI: `cd inspector && npm run dev:inspector` (Node.js required)
+- **Start MCP Server**: Use the provided VS Code task "Start MCP Server" which runs the server with SSE transport on port 5678 (see `debugpy` configuration in `server.py`).
+- **Start MCP Inspector**: Launch via the VS Code task "Start MCP Inspector". It requires the MCP Server to be running and is configured to use Node.js (refer to `inspector/package.json`).
 
-### Docker
+### Docker Usage
 
-- Build: `docker build -t mcp-git-commit-generator .`
-- Run (default): `docker run -i --rm --mount type=bind,src=${HOME},dst=${HOME} mcp-git-commit-generator`
-- Run (SSE): `docker run -d -p 3001:3001 --entrypoint mcp-git-commit-generator ... --transport sse --host 0.0.0.0 --port 3001`
+- **Build**: `docker build -t mcp-git-commit-generator .`
+- **Run**:
+  - Default: `docker run -i --rm --mount type=bind,src=${HOME},dst=${HOME} mcp-git-commit-generator`
+  - With SSE: `docker run -d -p 3001:3001 --entrypoint mcp-git-commit-generator ... --transport sse --host 0.0.0.0 --port 3001`
 
-## Project Conventions & Patterns
+## Project-Specific Conventions & Patterns
 
-- CLI always uses `--option value` (never positional args)
-- MCP tools are defined with `@mcp.tool()` and detailed docstrings in `server.py`
-- Git repo validation via `get_valid_repo_path` helper
-- Git commands use `subprocess.run` with error handling
-- Inspector UI is optional for debugging and tool testing
-- Versioning: update `pyproject.toml` for releases
-- Docker image is published on tag pushes starting with "v"
+- **Command Line Usage**: Always use `--option value`. Positional arguments are not supported.
+- **MCP Tool Definitions**: New tools must be defined in `server.py` with detailed docstrings. Follow the convention used in existing tools like `generate_commit_message` and `check_git_status`.
+- **Git Operations**: Always validate the git repo with `get_valid_repo_path`. Git commands are executed using `subprocess.run` with structured error handling.
+- **Inspector UI & Debugging**: The Inspector UI (found in `inspector/`) is optional but useful for testing new tool integrations. It runs on `http://localhost:5173` when started.
+- **Versioning & Releases**: Update `pyproject.toml` according to semver before releasing. Docker images are published on tag pushes starting with "v".
 
-## Integration Points & Client Configs
+## Integration Points & Communication
 
-- MCP clients: VS Code, Cursor, Windsurf, Claude Desktop (see README for Docker config examples)
-- Inspector UI: for interactive tool testing/debugging
+- **MCP Clients**: Integrates with VS Code, Cursor, Windsurf, and Claude Desktop. Refer to the README and CI/CD configuration for detailed Docker and client setup examples.
+- **Inter-Component Communication**: The server supports both `stdio` and `sse` transports. Ensure that any new integration or tool follows the patterns established in `server.py` and related CLI configuration.
 
-## Quick Usage Example
+## Example Usage
 
 1. Stage changes: `git add <files>`
-2. Use `check_git_status` to review staged/unstaged files
-3. Use `generate_commit_message` to create a conventional commit message
-4. Commit with the generated message
-
-## Advanced Configuration
-
-- See README for `.vscode/mcp.json` and Docker usage details
-- Inspector UI available at `http://localhost:5173` when running locally
+2. Run `check_git_status` to verify the current git state.
+3. Generate a conventional commit message with `generate_commit_message`.
+4. Commit using the generated message.
 
 ## Key Patterns for AI Agents
 
-- All commit message logic and new MCP tools should be added in `server.py`
-- Always validate git repo paths before running git commands
-- Use subprocess with error handling for all git operations
-- Inspector UI is for tool testing/debugging, not required for normal operation
+- **Focus on Key Files**: Read `server.py` for all MCP tool logic and refer to `__init__.py` for CLI conventions.
+- **Agent Guidance**: When building new agent features, follow the example patterns in this guide. Use inline comments with `// ...existing code...` to contextualize changes (see developer instructions).
+- **Collaboration & Feedback**: Always verify that new implementations integrate well with the established patterns for git operations, Docker usage, and the Inspector UI.
 
-## Feedback & Issues
+## Feedback & Iteration
 
-Open issues or suggestions on GitHub: https://github.com/theoklitosBam7/mcp-git-commit-generator/issues
-
-## Examples
-
-- To add a new MCP tool: define a function in `server.py` with `@mcp.tool()` and a docstring describing parameters/usage
-- To debug: use VS Code tasks or Inspector UI; breakpoints work in MCP tool code
-
-## Key Dependencies
-
-- `mcp[cli]` (core MCP)
-- `click` (CLI)
-- `debugpy` (dev/debugging)
-- Inspector UI: Node.js, `@modelcontextprotocol/inspector` (optional)
+Please review these updated instructions and provide feedback on any unclear or incomplete sections so that we can iterate further.

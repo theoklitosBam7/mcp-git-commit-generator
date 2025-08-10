@@ -1,4 +1,10 @@
-# MCP Git Commit Generator 🚀
+# MCP Git Commit Generator
+
+[![PyPI](https://img.shields.io/pypi/v/mcp-git-commit-generator.svg)](https://pypi.org/project/mcp-git-commit-generator/)
+[![GitHub Release](https://img.shields.io/github/v/release/theoklitosBam7/mcp-git-commit-generator)](https://github.com/theoklitosBam7/mcp-git-commit-generator/releases)
+[![Publish Python 🐍 package to PyPI](https://github.com/theoklitosBam7/mcp-git-commit-generator/actions/workflows/pypi-publish.yml/badge.svg)](https://github.com/theoklitosBam7/mcp-git-commit-generator/actions/workflows/pypi-publish.yml)
+[![Create and Publish Docker 🐳 image](https://github.com/theoklitosBam7/mcp-git-commit-generator/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/theoklitosBam7/mcp-git-commit-generator/actions/workflows/docker-publish.yml)
+[![License](https://img.shields.io/github/license/theoklitosBam7/mcp-git-commit-generator.svg)](https://github.com/theoklitosBam7/mcp-git-commit-generator/blob/main/LICENSE)
 
 Generate conventional commit messages from your staged git changes using Model Context Protocol (MCP).
 
