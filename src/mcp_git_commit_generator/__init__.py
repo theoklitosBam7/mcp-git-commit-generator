@@ -31,7 +31,10 @@ def main(
     port,
     verbose,
 ):
-    """Main function to run the MCP server with specified transport type."""
+    """
+    Generate conventional commit messages from your staged git changes using
+    Model Context Protocol (MCP).
+    """
     logging_level = logging.WARN
     if verbose == 1:
         logging_level = logging.INFO

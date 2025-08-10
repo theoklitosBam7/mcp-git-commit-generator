@@ -13,7 +13,7 @@ from mcp.server.fastmcp import FastMCP
 mcp = FastMCP("Git Commit Generator")
 
 
-def get_valid_repo_path(repo_path: Optional[str]) -> Optional[str]:
+def _get_valid_repo_path(repo_path: Optional[str]) -> Optional[str]:
     """
     Resolve and validate the git repository path.
     Returns the valid repo path if valid, otherwise None.
@@ -39,7 +39,15 @@ def generate_commit_message(
     scope: Optional[str] = None,
 ) -> str:
     """
-    Generate a conventional commit message based on staged git changes.
+    Prepare a structured analysis and instruction block for generating a
+    Conventional Commit message from staged git changes only.
+
+    Behavior:
+        - Validates the repository path and operates on the provided repo or CWD.
+        - Collects staged diff, porcelain status, and a name-status summary.
+        - Incorporates optional user preferences for commit_type and scope.
+        - Returns a single formatted string that includes context plus strict
+          output instructions for an LLM to produce a Conventional Commit.
 
     Args:
         repo_path: Optional path to the target git repository. If not provided, uses the current working directory.
@@ -47,10 +55,11 @@ def generate_commit_message(
         scope: Optional scope of the change
 
     Returns:
-        Analysis of git changes for generating conventional commit messages
+        A formatted prompt containing git change context and clear output rules
+        for generating a Conventional Commit message
     """
     try:
-        valid_repo_path = get_valid_repo_path(repo_path)
+        valid_repo_path = _get_valid_repo_path(repo_path)
         if not valid_repo_path:
             return f"Path '{repo_path or os.getcwd()}' is not a valid git repository."
         cwd = valid_repo_path
@@ -98,34 +107,35 @@ def generate_commit_message(
             {diff_result.stdout[:1500]}
 
             ### User Preferences:
-            - Requested commit type: {commit_type or "auto-detect based on changes"}
-            - Requested scope: {scope or "auto-detect based on files changed"}
+                - Requested commit type: {commit_type or "auto-detect based on changes"}
+                - Requested scope: {scope or "auto-detect based on files changed"}
 
-            ### Instructions:
-            Please generate a conventional commit message following this format:
-            `type(scope): description`
+            ### Task
+            Write a Conventional Commit message for the STAGED changes only.
 
-            **Common types:**
-            - feat: A new feature
-            - fix: A bug fix
-            - docs: Documentation only changes
-            - style: Changes that don't affect meaning (white-space, formatting, etc)
-            - refactor: Code change that neither fixes a bug nor adds a feature
-            - perf: A code change that improves performance
-            - build: Changes that affect the build system or external dependencies
-            - ci: Changes to our CI configuration files and scripts
-            - test: Adding missing tests or correcting existing tests
-            - chore: Changes to build process or auxiliary tools
-            - revert: Reverts a previous commit
+            ### Output format (return ONLY this)
+            First line: type(scope): subject
+            Optional blank line
+            Optional body paragraphs, each line <= 72 chars
+            Optional bullets in body starting with "- "
+            Optional footers (each on its own line), e.g.:
+            BREAKING CHANGE: description
+            Refs: #123
 
-            **Guidelines:**
-            - Use imperative mood in description ("add" not "adds" or "added")
-            - Don't capitalize first letter of description
-            - No period at the end of description
-            - Keep description under 50 characters if possible
-            - If scope is obvious from files, include it in parentheses
-            - If too many files are changed, consider summarizing the changes using list format in the commit body
-            - In the commit body list, use imperative mood, capitalize the first letter, and do not use a period at the end
+            ### Rules
+            - If commit_type or scope is provided above, USE THEM as-is.
+            - If not provided, infer an appropriate type and a concise scope (or omit scope if unclear).
+            - Subject: imperative mood, start lowercase, no trailing period, <= 50 chars.
+            - Body: imperative mood (e.g. Update; not Updated); explain WHAT and WHY, wrap at 72 chars; omit if subject suffices.
+            - Use domain-specific terms; avoid generic phrases.
+            - Do NOT mention "staged", "diff", or counts of files/lines.
+            - Do NOT include markdown headers, code fences, or extra commentary.
+            - Prefer a broad scope if many files; derive scope from top-level dirs when clear.
+            - If there is a breaking change (e.g., API removal/rename), add a BREAKING CHANGE footer.
+            - Keep the response to ONLY the commit message in the format above.
+
+            ### Common types
+            feat, fix, docs, style, refactor, perf, build, ci, test, chore, revert
             """
 
         return analysis
@@ -135,8 +145,8 @@ def generate_commit_message(
         return f"Git command failed: {error_msg}"
     except FileNotFoundError:
         return "Git is not installed or not found in PATH"
-    except Exception as e:
-        return f"Error analyzing git changes: {str(e)}"
+    except OSError as e:
+        return f"OS error occurred: {str(e)}"
 
 
 def _parse_git_status_line(line):
@@ -183,7 +193,7 @@ def check_git_status(repo_path: Optional[str] = None) -> str:
         Current git status including staged, unstaged, and untracked files
     """
     try:
-        valid_repo_path = get_valid_repo_path(repo_path)
+        valid_repo_path = _get_valid_repo_path(repo_path)
         if not valid_repo_path:
             return f"Path '{repo_path or os.getcwd()}' is not a valid git repository."
         cwd = valid_repo_path
@@ -243,11 +253,12 @@ def check_git_status(repo_path: Optional[str] = None) -> str:
         return status_summary
 
     except subprocess.CalledProcessError as e:
-        return f"Git command failed: {e.stderr or e.stdout or str(e)}"
+        error_msg = e.stderr or e.stdout or str(e)
+        return f"Git command failed: {error_msg}"
     except FileNotFoundError:
         return "Git is not installed or not found in PATH"
-    except Exception as e:
-        return f"Error checking git status: {str(e)}"
+    except OSError as e:
+        return f"OS error occurred: {str(e)}"
 
 
 if __name__ == "__main__":
