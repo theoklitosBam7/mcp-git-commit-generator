@@ -24,7 +24,7 @@ classifiers = [
 dependencies = ["click>=8.2.1", "mcp[cli]>=1.10.1"]
 
 [dependency-groups]
-dev = ["debugpy>=1.8.14", "pre-commit>=4.2.0"]
+dev = ["debugpy>=1.8.14", "pre-commit>=4.2.0", "pytest>=8.4.1"]
 
 [project.scripts]
 mcp-git-commit-generator = "mcp_git_commit_generator:main"
@@ -36,3 +36,7 @@ Issues = "https://github.com/theoklitosBam7/mcp-git-commit-generator/issues"
 [build-system]
 requires = ["uv_build >= 0.7.19, <0.9.0"]
 build-backend = "uv_build"
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]
