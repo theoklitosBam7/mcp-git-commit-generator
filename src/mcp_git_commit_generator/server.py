@@ -5,6 +5,7 @@ FastMCP Server for generating conventional commit messages from git diff
 import logging
 import os
 import subprocess
+import textwrap
 from typing import Optional
 
 from mcp.server.fastmcp import FastMCP
@@ -19,17 +20,16 @@ def _get_valid_repo_path(repo_path: Optional[str]) -> Optional[str]:
     Returns the valid repo path if valid, otherwise None.
     """
     logger = logging.getLogger(__name__)
-    logger.info(
-        "[get_valid_repo_path] Using current working directory: %s",
-        repo_path or os.getcwd(),
+    # Resolve user tilde and symlinks to a canonical path
+    resolved = (
+        os.path.realpath(os.path.expanduser(repo_path)) if repo_path else os.getcwd()
     )
-    if repo_path is None:
-        repo_path = os.getcwd()
-    if not os.path.isdir(repo_path) or not os.path.exists(
-        os.path.join(repo_path, ".git")
+    logger.info("[get_valid_repo_path] Resolved repository path: %s", resolved)
+    if not os.path.isdir(resolved) or not os.path.exists(
+        os.path.join(resolved, ".git")
     ):
         return None
-    return repo_path
+    return resolved
 
 
 @mcp.tool()
@@ -93,52 +93,58 @@ def generate_commit_message(
             cwd=cwd,
         )
 
-        # Prepare analysis for the AI
-        analysis = f"""
-            ## Git Change Analysis for Conventional Commit Message
+        diff_preview = diff_result.stdout[:1500]
+        analysis = textwrap.dedent(f"""
+        ## Git Change Analysis for Conventional Commit Message
 
-            ### Changed Files:
-            {files_result.stdout}
+        ### Changed Files:
+        {files_result.stdout}
 
-            ### File Status Summary:
-            {status_result.stdout}
+        ### File Status Summary:
+        {status_result.stdout}
 
-            ### Diff Preview (first 1500 chars):
-            {diff_result.stdout[:1500]}
+        ### Diff Preview (first 1500 chars):
+        {diff_preview}
 
-            ### User Preferences:
-                - Requested commit type: {commit_type or "auto-detect based on changes"}
-                - Requested scope: {scope or "auto-detect based on files changed"}
+        ### User Preferences:
+            - Requested commit type: {commit_type or "auto-detect based on changes"}
+            - Requested scope: {scope or "auto-detect based on files changed"}
 
-            ### Task
-            Write a Conventional Commit message for the STAGED changes only.
+        ### Task
+        Write a Conventional Commit message for the STAGED changes only.
 
-            ### Output format (return ONLY this)
-            First line: type(scope): subject
-            Optional blank line
-            Optional body paragraphs, each line <= 72 chars
-            Optional bullets in body starting with "- "
-            Optional footers (each on its own line), e.g.:
-            BREAKING CHANGE: description
-            Refs: #123
+        ### Output format (return ONLY this)
+        First line: type(scope): subject
+        Add blank line before body
+        Body paragraphs, each line <= 72 chars; bullets in body starting with "- "
+        Optional footers (each on its own line), e.g.:
+        BREAKING CHANGE: description
 
-            ### Rules
-            - If commit_type or scope is provided above, USE THEM as-is.
-            - If not provided, infer an appropriate type and a concise scope (or omit scope if unclear).
-            - Subject: imperative mood, start lowercase, no trailing period, <= 50 chars.
-            - Body: imperative mood (e.g. Update; not Updated); explain WHAT and WHY, wrap at 72 chars; omit if subject suffices.
-            - Use domain-specific terms; avoid generic phrases.
-            - Do NOT mention "staged", "diff", or counts of files/lines.
-            - Do NOT include markdown headers, code fences, or extra commentary.
-            - Prefer a broad scope if many files; derive scope from top-level dirs when clear.
-            - If there is a breaking change (e.g., API removal/rename), add a BREAKING CHANGE footer.
-            - Keep the response to ONLY the commit message in the format above.
+        ### Example generated commit message
+        feat(core): add new feature
 
-            ### Common types
-            feat, fix, docs, style, refactor, perf, build, ci, test, chore, revert
-            """
+        - Implement new feature in core module
+        - Update documentation
 
-        return analysis
+        BREAKING CHANGE: this change removes the old API method
+
+        ### Rules
+        - If commit_type or scope is provided above, USE THEM as-is.
+        - If not provided, infer an appropriate type and a concise scope (or omit scope if unclear).
+        - Subject: use imperative mood, start lowercase, no trailing period, <= 50 chars.
+        - Body: use imperative mood (e.g. Update, Add etc.); explain WHAT and WHY, wrap at 72 chars; omit if subject suffices.
+        - Use domain-specific terms; avoid generic phrases.
+        - Do NOT mention "staged", "diff", or counts of files/lines.
+        - Do NOT include markdown headers, code fences, or extra commentary.
+        - Prefer a broad scope if many files; derive scope from top-level dirs when clear.
+        - If there is a breaking change (e.g., API removal/rename), add a BREAKING CHANGE footer.
+        - Keep the response to ONLY the commit message in the format above.
+
+        ### Common types
+        feat, fix, docs, style, refactor, perf, build, ci, test, chore, revert
+        """)
+
+        return analysis.strip()
 
     except subprocess.CalledProcessError as e:
         error_msg = e.stderr or e.stdout or str(e)

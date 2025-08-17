@@ -10,10 +10,12 @@ Generate conventional commit messages from your staged git changes using Model C
 
 ## ✨ Features
 
-- **Automatic commit message generation** based on staged git diffs.
-- Supports [Conventional Commits](https://www.conventionalcommits.org/).
-- MCP server with both stdio (default) and SSE transport options.
-- Inspector UI for interactive inspection (via MCP Inspector).
+- **🤖 Automatic commit message generation** based on staged git diffs
+- **📝 Conventional Commits** support with auto-detection of type and scope
+- **🔄 Multiple transport options** - stdio (default) and SSE for different use cases
+- **🔍 Inspector UI** for interactive testing and debugging
+- **🐳 Docker support** with pre-built images for easy deployment
+- **⚡ Cross-platform** - works on macOS, Linux, and Windows
 
 ## 📦 Requirements
 
@@ -457,6 +459,32 @@ npm run dev:inspector
 
 > The Inspector UI will be available at `http://localhost:5173`.
 
+### 🧪 Running Tests
+
+The project includes comprehensive unit tests to ensure reliability:
+
+```sh
+# Run all tests
+pytest
+
+# Run tests with verbose output
+pytest -v
+
+# Run tests with coverage
+pytest --cov=src/mcp_git_commit_generator
+
+# Run specific test file
+pytest tests/test_server.py
+```
+
+**Test Coverage:**
+
+- ✅ Tool validation with invalid repository paths
+- ✅ Staged and unstaged change detection
+- ✅ Git status reporting
+- ✅ Commit message generation workflows
+- ✅ Error handling for git command failures
+
 ### 🗂️ Project Structure
 
 ```sh
@@ -552,6 +580,22 @@ arguments in the input fields to simulate real usage and debug argument handling
 ## 💬 Feedback
 
 If you have any feedback or suggestions, please open an issue on the [MCP Git Commit Generator GitHub repository](https://github.com/theoklitosBam7/mcp-git-commit-generator/issues)
+
+## 📖 Troubleshooting
+
+### Common Issues
+
+- **"Path is not a valid git repository"**: Ensure you're in a directory with a `.git` folder
+- **"No staged changes found"**: Run `git add <files>` to stage your changes first
+- **"Git is not installed"**: Install Git from [git-scm.com](https://git-scm.com/)
+- **Docker permission issues**: Ensure Docker can access your home directory
+- **MCP connection fails**: Verify your client configuration matches the examples above
+
+### Getting Help
+
+- Check the [Issues page](https://github.com/theoklitosBam7/mcp-git-commit-generator/issues) for solutions
+- Use the Inspector UI for interactive debugging
+- Run `pytest -v` to verify your installation
 
 ## 📄 License
 
