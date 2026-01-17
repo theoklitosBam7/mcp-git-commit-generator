@@ -1,5 +1,5 @@
 # Use a Python image with uv pre-installed
-FROM ghcr.io/astral-sh/uv:python3.13-bookworm-slim AS uv
+FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim AS uv
 
 LABEL org.opencontainers.image.source="https://github.com/theoklitosBam7/mcp-git-commit-generator"
 LABEL org.opencontainers.image.description="Generate conventional commit messages from your staged git changes using Model Context Protocol (MCP)."
@@ -29,7 +29,7 @@ RUN --mount=type=cache,target=/root/.cache/uv \
 
 RUN uv pip install .
 
-FROM python:3.13-slim-bookworm
+FROM python:3.14-slim-bookworm
 
 LABEL org.opencontainers.image.source="https://github.com/theoklitosBam7/mcp-git-commit-generator"
 LABEL org.opencontainers.image.description="Generate conventional commit messages from your staged git changes using Model Context Protocol (MCP)."
