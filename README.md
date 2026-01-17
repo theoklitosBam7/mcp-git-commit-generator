@@ -299,10 +299,11 @@ If you prefer not to use Docker for development, you can run the server locally:
 **Requirements:**
 
 - [Python](https://www.python.org/) >= 3.13.5
-- [MCP CLI](https://pypi.org/project/mcp/) >= 1.10.1
-- [uv](https://github.com/astral-sh/uv) (for dependency management, optional but recommended)
+- [uv](https://github.com/astral-sh/uv) (recommended for dependency management and local development)
 - [Node.js](https://nodejs.org/en) (for Inspector UI, optional)
 - [Python Debugger Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy) (for debugging, optional)
+
+> **Note**: The MCP CLI dependency is automatically installed via [`uv.lock`](uv.lock:1) when using `uv sync`.
 
 **Installation:**
 
@@ -321,7 +322,7 @@ If you prefer not to use Docker for development, you can run the server locally:
 
     | Approach | Steps |
     | -------- | ----- |
-    | Using `uv` | 1. Create virtual environment: `uv venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies (include dev dependencies): `uv pip install -r pyproject.toml --group dev` <br>4. Install `mcp-git-commit-generator` using the command: `uv pip install -e .`. |
+    | Using `uv` (Recommended) | 1. Create virtual environment and install dependencies: `uv sync --group dev` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from `.venv` directory <br>3. The project is installed in editable mode automatically by `uv sync`. |
     | Using `pip` | 1. Create virtual environment: `python -m venv .venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies: `pip install -e .`. <br>4. Install pip dev dependencies: `pip install -r requirements-dev.txt`. |
 
 3. **(Optional) Install Inspector dependencies:**
@@ -392,29 +393,36 @@ The server will be available at `http://localhost:3001` when using SSE.
 2. From the project root, run:
 
   <details>
-  <summary>mcp-git-commit-generator</summary>
+  <summary>Using uv (Recommended)</summary>
 
    ```sh
-   # If you have mcp-git-commit-generator installed in your environment (default: stdio)
-   mcp-git-commit-generator
+   # Run with uv (uses uv.lock for consistent dependencies)
+   uv run mcp-git-commit-generator
+
+   # Or with SSE transport
+   uv run mcp-git-commit-generator --transport sse
    ```
 
   </details>
 
   <details>
-  <summary>mcp-git-commit-generator with SSE transport</summary>
-
-   ```sh
-   mcp-git-commit-generator --transport sse
-   ```
-
-  </details>
-
-  <details>
-  <summary>Using uv</summary>
+  <summary>Using uv run with module</summary>
 
    ```sh
    uv run -m mcp_git_commit_generator --transport sse
+   ```
+
+  </details>
+
+  <details>
+  <summary>mcp-git-commit-generator (installed in environment)</summary>
+
+   ```sh
+   # Default stdio transport
+   mcp-git-commit-generator
+
+   # With SSE transport
+   mcp-git-commit-generator --transport sse
    ```
 
   </details>
@@ -464,17 +472,20 @@ npm run dev:inspector
 The project includes comprehensive unit tests to ensure reliability:
 
 ```sh
-# Run all tests
+# Run all tests (recommended when using uv)
+uv run pytest
+
+# Or using pytest directly
 pytest
 
 # Run tests with verbose output
-pytest -v
+uv run pytest -v
 
 # Run tests with coverage
-pytest --cov=src/mcp_git_commit_generator
+uv run pytest --cov=src/mcp_git_commit_generator
 
 # Run specific test file
-pytest tests/test_server.py
+uv run pytest tests/test_server.py
 ```
 
 **Test Coverage:**
@@ -497,8 +508,8 @@ pytest tests/test_server.py
 ├── LICENSE
 ├── README.md
 ├── pyproject.toml          # Python project configuration
-├── requirements-dev.txt    # Development dependencies
-├── uv.lock                 # Python dependencies lock file
+├── requirements-dev.txt    # Development dependencies (for pip users)
+├── uv.lock                 # Dependency lock file for reproducible builds (used by uv sync)
 ├── Dockerfile              # Docker build file
 ├── build/                  # Build artifacts
 ├── src/                    # Python source code
@@ -595,7 +606,8 @@ If you have any feedback or suggestions, please open an issue on the [MCP Git Co
 
 - Check the [Issues page](https://github.com/theoklitosBam7/mcp-git-commit-generator/issues) for solutions
 - Use the Inspector UI for interactive debugging
-- Run `pytest -v` to verify your installation
+- Run `uv run pytest -v` to verify your installation (recommended)
+- Or run `pytest -v` if using pip
 
 ## 📄 License
 

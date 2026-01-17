@@ -7,6 +7,6 @@
     "dev:inspector": "CLIENT_PORT=5173 SERVER_PORT=3000 mcp-inspector"
   },
   "devDependencies": {
-    "@modelcontextprotocol/inspector": "^0.15.0"
+    "@modelcontextprotocol/inspector": "^0.18.0"
   }
 }
