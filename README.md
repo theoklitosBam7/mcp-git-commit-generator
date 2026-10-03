@@ -171,13 +171,31 @@ uv build
 
 ### MCP Inspector v2
 
+Start the MCP server in one terminal from the repository root:
+
+```sh
+uv run mcp-git-commit-generator \
+  --transport streamable-http \
+  --host 127.0.0.1 \
+  --port 3001
+```
+
+In another terminal, start Inspector with the local server configured:
+
 ```sh
 cd inspector
 npm ci
-npm run dev:inspector
+npm run dev:inspector -- \
+  --transport http \
+  --server-url http://127.0.0.1:3001/mcp \
+  --protocol-era modern
 ```
 
-Start the server separately with Streamable HTTP and connect Inspector to `http://127.0.0.1:3001/mcp`.
+Open the Inspector URL printed in the terminal, normally at `http://127.0.0.1:6274`. If the local server's connection switch is off, turn it on. Inspector calls the transport `http`; the Python server calls it `streamable-http`.
+
+The `/mcp` URL is a protocol endpoint, not a web interface. Do not open it directly in the browser to use Inspector.
+
+For VS Code debugging, select the project's `.venv` Python interpreter, install the Inspector dependencies with `npm ci` in `inspector`, and run **Debug in Inspector (Chrome)** or **Debug in Inspector (Edge)**. These configurations start both processes and open Inspector on port `5173`.
 
 ## CI and supply-chain controls
 

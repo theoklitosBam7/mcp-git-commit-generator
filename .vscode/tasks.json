@@ -26,14 +26,25 @@
         "background": {
           "activeOnStart": true,
           "beginsPattern": ".*",
-          "endsPattern": "Application startup complete|running"
+          "endsPattern": "session manager.*started|^\\s*started\\s*$"
         }
       }
     },
     {
       "label": "Start MCP Inspector",
       "type": "shell",
-      "command": "npm run dev:inspector",
+      "command": "npm",
+      "args": [
+        "run",
+        "dev:inspector",
+        "--",
+        "--transport",
+        "http",
+        "--server-url",
+        "http://127.0.0.1:3001/mcp",
+        "--protocol-era",
+        "modern"
+      ],
       "isBackground": true,
       "options": {
         "cwd": "${workspaceFolder}/inspector",
@@ -44,7 +55,7 @@
         "background": {
           "activeOnStart": true,
           "beginsPattern": "Starting MCP inspector|MCP Inspector",
-          "endsPattern": "Proxy server listening|localhost:5173"
+          "endsPattern": "http://127\\.0\\.0\\.1:5173"
         }
       },
       "dependsOn": ["Start MCP Server"]
