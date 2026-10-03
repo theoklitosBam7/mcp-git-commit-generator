@@ -204,7 +204,7 @@ For Docker, prefer a narrow read-only repository mount instead of mounting the w
 
 1. Update `version` in `pyproject.toml`.
 2. Run all checks and refresh both lockfiles.
-3. Create a matching tag, for example `v2.3.0`.
+3. Create a matching tag, for example `v3.0.0`.
 4. Push the tag.
 
 Tag pushes build and publish the Python package and container image. PyPI uses trusted publishing.
