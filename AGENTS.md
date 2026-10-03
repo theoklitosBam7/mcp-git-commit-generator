@@ -1,26 +1,32 @@
 # AGENTS.md
 
-This file provides guidance to agents when working with code in this repository.
+Guidance for agents working in this repository.
 
-## Build/Test Commands
+## Build and test
 
-- `uv run pytest` - Run all tests (uses pytest with pythonpath=src)
-- `uv run pytest tests/test_server.py` - Run specific test file
-- `uv run pytest -v` - Run tests with verbose output
-- `uv run pytest --cov=src/mcp_git_commit_generator` - Run tests with coverage
-- `uv sync --group dev` - Install dependencies with dev tools
-- `uv run mcp-git-commit-generator --transport sse` - Run server with SSE transport (required for Inspector UI)
-- `cd inspector && npm install && npm run dev:inspector` - Start Inspector UI (requires SSE server running on port 3001)
+- `uv sync --all-groups` installs the locked development environment.
+- `uv run pytest` runs the test suite.
+- `uv run python -m compileall -q src tests` checks Python syntax.
+- `uv build --locked` builds release artifacts from the lockfile.
+- `uv run mcp-git-commit-generator --transport streamable-http` starts the HTTP development server at `127.0.0.1:3001/mcp`.
+- `cd inspector && npm ci && npm run dev:inspector` starts MCP Inspector v2.
 
-## Critical Implementation Details
+## MCP compatibility
 
-- Git commands MUST use `cwd=cwd` parameter in subprocess.run() to target the correct repository
-- Path resolution uses `os.path.realpath(os.path.expanduser())` to handle tilde and symlinks
-- Diff preview is truncated to 1500 characters in generate_commit_message for analysis
-- Inspector UI requires SSE transport (stdio won't work) - server runs on port 3001, inspector on port 5173
-- pytest config has `pythonpath = ["src"]` - critical for imports to work in tests
-- Build backend is `uv_build` (not standard setuptools) - requires `uv` for building
-- Tests need git config setup in CI: `git config --global user.email "ci@example.com" && git config --global user.name "CI Runner"`
-- Server uses FastMCP framework from `mcp.server.fastmcp` - tools decorated with `@mcp.tool()`
-- LOG_LEVEL env var overrides logging (DEBUG/INFO/WARNING/ERROR/CRITICAL)
-- Two MCP tools: `generate_commit_message` (analyzes staged changes) and `check_git_status` (reports repo state)
+- The server uses `MCPServer` from the official Python MCP SDK v2.
+- The target protocol is `2026-07-28`; the SDK also serves legacy MCP clients.
+- `stdio` is the default transport. Use Streamable HTTP for network serving.
+- SSE remains only for legacy compatibility and must not be the default in new examples.
+- Protocol tests must cover both modern `2026-07-28` and legacy client modes.
+
+## Security and implementation requirements
+
+- Git subprocesses must use `cwd=` and must never use `shell=True`.
+- Use `_run_git()` so Git commands keep the timeout, non-interactive environment, no external diff, and pager controls.
+- Treat repository content as untrusted model input. Do not interpolate raw repository text into instruction sections.
+- Keep the staged diff preview capped at 1500 characters unless a deliberate design change is tested.
+- Validate model-facing preference fields before adding them to generated prompts.
+- Bind HTTP development servers to loopback by default. A non-loopback bind must be an explicit operator choice.
+- Keep GitHub Actions pinned to full commit SHAs and retain the release tag in a same-line comment for update tooling.
+- Keep Python and npm lockfiles current. Do not merge dependency changes with stale lockfiles.
+- The container must run as a non-root user and should not gain Linux capabilities it does not need.

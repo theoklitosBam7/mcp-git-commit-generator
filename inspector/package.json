@@ -1,12 +1,15 @@
 {
-  "name": "inspector-placeholder",
+  "name": "mcp-git-commit-generator-inspector",
   "version": "0.0.1",
-  "description": "This is just a placeholder to launch the inspector.",
+  "description": "Development launcher for the MCP Inspector.",
   "private": true,
+  "engines": {
+    "node": ">=22.19.0"
+  },
   "scripts": {
-    "dev:inspector": "CLIENT_PORT=5173 SERVER_PORT=3000 mcp-inspector"
+    "dev:inspector": "mcp-inspector"
   },
   "devDependencies": {
-    "@modelcontextprotocol/inspector": "^0.18.0"
+    "@modelcontextprotocol/inspector": "2.9.0"
   }
 }
