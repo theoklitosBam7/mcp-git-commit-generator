@@ -37,7 +37,7 @@ jobs:
       - name: Build distributions
         if: runner.os == 'Linux'
         shell: bash
-        run: uv build --locked
+        run: uv build
 
   inspector:
     name: Inspector dependency check
