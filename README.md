@@ -2,558 +2,104 @@
 
 [![PyPI](https://img.shields.io/pypi/v/mcp-git-commit-generator.svg)](https://pypi.org/project/mcp-git-commit-generator/)
 [![GitHub Release](https://img.shields.io/github/v/release/theoklitosBam7/mcp-git-commit-generator)](https://github.com/theoklitosBam7/mcp-git-commit-generator/releases)
-[![Publish Python 🐍 package to PyPI](https://github.com/theoklitosBam7/mcp-git-commit-generator/actions/workflows/pypi-publish.yml/badge.svg)](https://github.com/theoklitosBam7/mcp-git-commit-generator/actions/workflows/pypi-publish.yml)
-[![Create and Publish Docker 🐳 image](https://github.com/theoklitosBam7/mcp-git-commit-generator/actions/workflows/docker-publish.yml/badge.svg)](https://github.com/theoklitosBam7/mcp-git-commit-generator/actions/workflows/docker-publish.yml)
+[![CI](https://github.com/theoklitosBam7/mcp-git-commit-generator/actions/workflows/ci.yml/badge.svg)](https://github.com/theoklitosBam7/mcp-git-commit-generator/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/theoklitosBam7/mcp-git-commit-generator.svg)](https://github.com/theoklitosBam7/mcp-git-commit-generator/blob/main/LICENSE)
 
-Generate conventional commit messages from your staged git changes using Model Context Protocol (MCP).
+Generate Conventional Commit messages from staged Git changes through the Model Context Protocol (MCP).
 
-## ✨ Features
+## MCP compatibility
 
-- **🤖 Automatic commit message generation** based on staged git diffs
-- **📝 Conventional Commits** support with auto-detection of type and scope
-- **🔄 Multiple transport options** - stdio (default) and SSE for different use cases
-- **🔍 Inspector UI** for interactive testing and debugging
-- **🐳 Docker support** with pre-built images for easy deployment
-- **⚡ Cross-platform** - works on macOS, Linux, and Windows
+This release uses the official Python MCP SDK v2 and targets the **MCP 2026-07-28** specification.
 
-## 📦 Requirements
+The SDK can serve both protocol eras:
 
-- **For Docker usage**: [Docker](https://www.docker.com/) (for running the server in a container)
-- **For PyPI/uvx usage**: [Python](https://www.python.org/) >= 3.13.5 and [uv](https://github.com/astral-sh/uv)
-  (recommended) or pip
-- [Git](https://git-scm.com/) (for version control)
-- An MCP-compatible client (VS Code with MCP extension, Claude Desktop, Cursor, Windsurf, etc.)
+- Modern clients use the 2026-07-28 `server/discover` flow.
+- Older clients can still use the legacy `initialize` handshake.
+- `stdio` is the default local transport.
+- `streamable-http` is the recommended network transport. Its default endpoint is `/mcp`.
+- `sse` remains available only for legacy integrations.
 
-## 🚀 Installation
+This server configures Streamable HTTP as stateless JSON because its tools do not need a server-to-client back-channel.
 
-You can install and use the MCP Git Commit Generator in multiple ways:
+## Features
 
-### Option 1: Using uvx (Recommended)
+- Generate a Conventional Commit prompt from staged changes only.
+- Inspect staged, unstaged, and untracked files.
+- Accept a repository root or a path inside a Git worktree.
+- Cap the staged diff preview at 1500 characters.
+- Treat repository text as untrusted model input.
+- Validate `commit_type` and `scope` before they enter a model prompt.
+- Run Git without a shell, external diff, pager, or interactive prompts.
+- Apply a 15-second timeout to Git commands.
+- Support stdio, Streamable HTTP, and legacy SSE.
+- Run the published container as a non-root user.
+- Test modern MCP 2026-07-28 and legacy MCP behavior.
 
-The easiest way to use the package is with `uvx`, which automatically manages the virtual environment:
+## Requirements
+
+- Python 3.14 or later.
+- Git.
+- An MCP-compatible client.
+- Optional: Docker.
+- Optional: Node.js 22.19 or later for MCP Inspector v2.
+
+## Install
+
+### uvx
 
 ```sh
 uvx mcp-git-commit-generator
 ```
 
-### Option 2: Install from PyPI
+### PyPI
 
 ```sh
 pip install mcp-git-commit-generator
 ```
 
-Or with uv:
+### Docker
+
+Mount only the repository that the server must inspect. A read-only mount is enough because the tools do not create commits or edit files.
 
 ```sh
-uv pip install mcp-git-commit-generator
-```
-
-### Option 3: Using Docker
-
-Use the pre-built Docker image from GitHub Container Registry (no installation required):
-
-```sh
-docker run -i --rm --mount type=bind,src=${HOME},dst=${HOME} ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest
-```
-
-## 🛠️ Available Tools
-
-This MCP server provides the following tools to help you generate conventional commit messages:
-
-### `generate_commit_message`
-
-Generates a conventional commit message based on your staged git changes.
-
-**Parameters:**
-
-- `repo_path` (string, optional): Path to the git repository. If omitted, uses the current directory.
-- `commit_type` (string, optional): Conventional commit type (e.g., `feat`, `fix`, `docs`, `style`, `refactor`,
-  `perf`, `build`, `ci`, `test`, `chore`, `revert`). If omitted, the type will be auto-detected.
-- `scope` (string, optional): Scope of the change (e.g., file or module name). If omitted, the scope will be
-  auto-detected based on changed files.
-
-**Usage:**
-
-1. Stage your changes: `git add <files>`
-2. Use the tool through your MCP client to generate a commit message
-3. The tool will analyze your staged changes and generate an appropriate conventional commit message
-
-### `check_git_status`
-
-Checks the current git repository status, including staged, unstaged, and untracked files.
-
-**Parameters:**
-
-- `repo_path` (string, optional): Path to the git repository. If omitted, uses the current directory.
-
-**Usage:**
-
-Use this tool to get an overview of your current git repository state before generating commit messages.
-
-## 🧩 MCP Client Configuration
-
-Configure the MCP Git Commit Generator in your favorite MCP client. You have multiple options:
-
-1. **Using uvx** (recommended - automatically manages dependencies)
-2. **Using Docker** (no local Python installation required)
-3. **Using local Python installation** (for development)
-
-### VS Code
-
-Add one of the following configurations to your VS Code `mcp.json` file (usually located at `.vscode/mcp.json` in your workspace):
-
-#### Using uvx (Recommended)
-
-```jsonc
-{
-  "servers": {
-    "mcp-git-commit-generator": {
-      "command": "uvx",
-      "args": ["mcp-git-commit-generator"]
-    }
-  }
-}
-```
-
-#### Using Docker
-
-```jsonc
-{
-  "servers": {
-    "mcp-git-commit-generator": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "--mount",
-        "type=bind,src=${userHome},dst=${userHome}",
-        "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
-      ]
-    }
-  }
-}
-```
-
-If you want to put the configuration in your user `settings.json` file, you can do so by adding:
-
-```jsonc
-{
-  "mcp": {
-    "servers": {
-      "mcp-git-commit-generator": {
-        "command": "uvx",
-        "args": ["mcp-git-commit-generator"]
-      }
-    }
-  }
-}
-```
-
-### Cursor
-
-Add one of the following to your Cursor MCP configuration file (usually located at `~/.cursor/mcp.json`):
-
-#### Cursor with uvx (Recommended)
-
-```jsonc
-{
-  "mcpServers": {
-    "mcp-git-commit-generator": {
-      "command": "uvx",
-      "args": ["mcp-git-commit-generator"]
-    }
-  }
-}
-```
-
-#### Cursor with Docker
-
-```jsonc
-{
-  "mcpServers": {
-    "mcp-git-commit-generator": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "--mount",
-        "type=bind,src=${userHome},dst=${userHome}",
-        "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
-      ]
-    }
-  }
-}
-```
-
-### Windsurf
-
-Configure Windsurf with one of the following MCP server settings (usually located at `~/.codeium/windsurf/mcp_config.json`):
-
-#### Windsurf with uvx (Recommended)
-
-```jsonc
-{
-    "mcpServers": {
-      "mcp-git-commit-generator": {
-        "command": "uvx",
-        "args": ["mcp-git-commit-generator"]
-      }
-    }
-}
-```
-
-#### Windsurf with Docker
-
-```jsonc
-{
-    "mcpServers": {
-      "mcp-git-commit-generator": {
-        "command": "docker",
-        "args": [
-          "run",
-          "-i",
-          "--rm",
-          "--mount",
-          "type=bind,src=${userHome},dst=${userHome}",
-          "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
-        ]
-      }
-    }
-}
-```
-
-### Claude Desktop
-
-Add one of the following to your Claude Desktop configuration file (usually located at
-`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS):
-
-#### Claude Desktop with uvx (Recommended)
-
-```jsonc
-{
-  "mcpServers": {
-    "mcp-git-commit-generator": {
-      "command": "uvx",
-      "args": ["mcp-git-commit-generator"]
-    }
-  }
-}
-```
-
-#### Claude Desktop with Docker
-
-```jsonc
-{
-  "mcpServers": {
-    "mcp-git-commit-generator": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "--mount",
-        "type=bind,src=${userHome},dst=${userHome}",
-        "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
-      ]
-    }
-  }
-}
-```
-
-> **Note**: The `--mount` option in Docker configurations allows the Docker container to access your home
-> directory, enabling it to work with git repositories located anywhere in your file system. When using uvx or pip
-> installations, this mounting is not needed as the tool runs directly on your system. Adjust the mount path if your
-> repositories are located elsewhere when using Docker.
-
-## 🚀 Quick Start Guide
-
-1. **Install the package** using one of the methods above:
-   - **Recommended**: `uvx mcp-git-commit-generator` (or configure in your MCP client)
-   - **Alternative**: `pip install mcp-git-commit-generator`
-   - **Docker**: Use the configurations above with Docker
-2. **Configure your MCP client** using one of the configurations above
-3. **Stage some changes** in a git repository:
-
-   ```sh
-   git add <files>
-   ```
-
-4. **Use the tools** through your MCP client:
-   - Use `check_git_status` to see your current repository state
-   - Use `generate_commit_message` to create a conventional commit message
-5. **Commit your changes** with the generated message
-
----
-
-## 👨‍💻 Developer Guidelines
-
-The following sections are intended for developers who want to contribute to or modify the MCP Git Commit Generator.
-
-### Local Development Setup 🛠️
-
-If you prefer not to use Docker for development, you can run the server locally:
-
-**Requirements:**
-
-- [Python](https://www.python.org/) >= 3.13.5
-- [uv](https://github.com/astral-sh/uv) (recommended for dependency management and local development)
-- [Node.js](https://nodejs.org/en) (for Inspector UI, optional)
-- [Python Debugger Extension](https://marketplace.visualstudio.com/items?itemName=ms-python.debugpy) (for debugging, optional)
-
-> **Note**: The MCP CLI dependency is automatically installed via [`uv.lock`](uv.lock:1) when using `uv sync`.
-
-**Installation:**
-
-1. **Clone the repository:**
-
-   ```sh
-   git clone https://github.com/theoklitosBam7/mcp-git-commit-generator.git
-   cd mcp-git-commit-generator
-   ```
-
-2. **Prepare environment:**
-
-    There are two approaches to set up the environment for this project. You can choose either one based on your preference.
-
-    > Note: Reload VSCode or terminal to ensure the virtual environment python is used after creating the virtual environment.
-
-    | Approach | Steps |
-    | -------- | ----- |
-    | Using `uv` (Recommended) | 1. Create virtual environment and install dependencies: `uv sync --group dev` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from `.venv` directory <br>3. The project is installed in editable mode automatically by `uv sync`. |
-    | Using `pip` | 1. Create virtual environment: `python -m venv .venv` <br>2. Run VSCode Command "***Python: Select Interpreter***" and select the python from created virtual environment <br>3. Install dependencies: `pip install -e .`. <br>4. Install pip dev dependencies: `pip install -r requirements-dev.txt`. |
-
-3. **(Optional) Install Inspector dependencies:**
-
-   ```sh
-   cd inspector
-   npm install
-   ```
-
-### 📦 Publishing to PyPI
-
-The project includes an automated PyPI publishing workflow (`.github/workflows/pypi-publish.yml`) that:
-
-- **Triggers on**: Tag pushes matching `v*.*.*` pattern, manual workflow dispatch, or pull requests to main
-- **Builds**: Python package distributions using the `build` package
-- **Publishes**: Automatically publishes to PyPI using trusted publishing (OIDC) when tags are pushed
-
-To publish a new version:
-
-1. Update the version in `pyproject.toml`
-2. Create and push a git tag: `git tag vX.Y.Z && git push origin vX.Y.Z`
-3. The workflow will automatically build and publish to PyPI
-
-### 🐳 Building and Running with Docker
-
-You can build and run the MCP Git Commit Generator using Docker. The provided Dockerfile uses a multi-stage build
-with [`uv`](https://github.com/astral-sh/uv) for dependency management and runs the server as a non-root user for security.
-
-#### Build the Docker image
-
-```sh
-docker build -t mcp-git-commit-generator .
-```
-
-#### Run the server in a container (default: stdio transport)
-
-You can run the published image directly from GitHub Container Registry.
-
-```sh
-docker run -d \
-  --name mcp-git-commit-generator \
+docker run -i --rm \
+  --read-only \
+  --cap-drop=ALL \
+  --security-opt=no-new-privileges:true \
+  --mount type=bind,src="$PWD",dst="$PWD",readonly \
   ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest
 ```
 
-By default, the container runs:
+## Tools
 
-```sh
-mcp-git-commit-generator --transport stdio
-```
+### `generate_commit_message`
 
-If you want to use SSE transport (for Inspector UI or remote access), override the entrypoint or run manually:
+Build a strict prompt for a Conventional Commit message from staged changes.
 
-```sh
-docker run -d \
-  --name mcp-git-commit-generator \
-  -p 3001:3001 \
-  --entrypoint mcp-git-commit-generator \
-  ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest --transport sse --host 0.0.0.0 --port 3001
-```
+Parameters:
 
-The server will be available at `http://localhost:3001` when using SSE.
+- `repo_path`: optional repository path. A path inside a worktree is accepted.
+- `commit_type`: optional Conventional Commit type: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `build`, `ci`, `test`, `chore`, or `revert`.
+- `scope`: optional 1-50 character scope. It can contain letters, numbers, `.`, `_`, `/`, and `-`.
 
-### 🖥️ Running the Server Locally
+### `check_git_status`
 
-**To run locally (without Docker):**
+Report the current branch plus staged, unstaged, and untracked files.
 
-1. Set up your uv or Python environment as described in the Local Development Setup section.
-2. From the project root, run:
+Parameter:
 
-  <details>
-  <summary>Using uv (Recommended)</summary>
+- `repo_path`: optional repository path. A path inside a worktree is accepted.
 
-   ```sh
-   # Run with uv (uses uv.lock for consistent dependencies)
-   uv run mcp-git-commit-generator
+## Client configuration
 
-   # Or with SSE transport
-   uv run mcp-git-commit-generator --transport sse
-   ```
+### uvx with stdio
 
-  </details>
+Common MCP client format:
 
-  <details>
-  <summary>Using uv run with module</summary>
-
-   ```sh
-   uv run -m mcp_git_commit_generator --transport sse
-   ```
-
-  </details>
-
-  <details>
-  <summary>mcp-git-commit-generator (installed in environment)</summary>
-
-   ```sh
-   # Default stdio transport
-   mcp-git-commit-generator
-
-   # With SSE transport
-   mcp-git-commit-generator --transport sse
-   ```
-
-  </details>
-
-  <details>
-  <summary>Using Python directly</summary>
-
-   ```sh
-   python -m mcp_git_commit_generator --transport sse
-   ```
-
-  </details>
-
-  <br/>
-
-  You can specify other options, for example:
-
-   ```sh
-   python -m mcp_git_commit_generator --transport sse --host 0.0.0.0 --port 3001 -v
-   ```
-
-   > The server listens on `0.0.0.0:3001` by default when using SSE, or as specified by the options above.
-
-**Note:**
-
-- If you want to use the CLI entrypoint, ensure the package is installed and your environment is activated.
-- Do not use positional arguments (e.g., `python -m mcp_git_commit_generator sse`);
-always use options like `--transport sse`.
-- Available arguments with their values are:
-  - `--transport`: Transport type (e.g., `stdio` (default), `sse`).
-  - `--host`: Host to bind the server (default: `0.0.0.0`).
-  - `--port`: Port to bind the server (default: `3001`).
-  - `-v`, `--verbose`: Verbosity level (e.g., `-v`, `-vv`).
-
-### 🔎 Start the Inspector UI
-
-From the `inspector` directory:
-
-```sh
-npm run dev:inspector
-```
-
-> The Inspector UI will be available at `http://localhost:5173`.
-
-### 🧪 Running Tests
-
-The project includes comprehensive unit tests to ensure reliability:
-
-```sh
-# Run all tests (recommended when using uv)
-uv run pytest
-
-# Or using pytest directly
-pytest
-
-# Run tests with verbose output
-uv run pytest -v
-
-# Run tests with coverage
-uv run pytest --cov=src/mcp_git_commit_generator
-
-# Run specific test file
-uv run pytest tests/test_server.py
-```
-
-**Test Coverage:**
-
-- ✅ Tool validation with invalid repository paths
-- ✅ Staged and unstaged change detection
-- ✅ Git status reporting
-- ✅ Commit message generation workflows
-- ✅ Error handling for git command failures
-
-### 🗂️ Project Structure
-
-```sh
-.
-├── .github/                # GitHub workflows and issue templates
-├── .gitignore
-├── .markdownlint.jsonc
-├── .python-version
-├── .vscode/                # VSCode configuration
-├── LICENSE
-├── README.md
-├── pyproject.toml          # Python project configuration
-├── requirements-dev.txt    # Development dependencies (for pip users)
-├── uv.lock                 # Dependency lock file for reproducible builds (used by uv sync)
-├── Dockerfile              # Docker build file
-├── build/                  # Build artifacts
-├── src/                    # Python source code
-│   └── mcp_git_commit_generator/
-│       ├── __init__.py     # Main entry point
-│       ├── __main__.py     # CLI entry point
-│       └── server.py       # Main server implementation
-└── inspector/              # Inspector related files
-    ├── package.json        # Node.js dependencies
-    └── package-lock.json
-```
-
-### ⚙️ Advanced MCP Server Configuration for Development
-
-The `.vscode/mcp.json` file configures how VS Code and related tools connect to your MCP Git Commit Generator server.
-This file defines available server transports and their connection details, making it easy to switch between
-different modes (stdio is default, SSE is optional) for development and debugging.
-
-#### Example Development `mcp.json`
-
-```jsonc
+```json
 {
-  "servers": {
+  "mcpServers": {
     "mcp-git-commit-generator": {
-      "command": "docker",
-      "args": [
-        "run",
-        "-i",
-        "--rm",
-        "--mount",
-        "type=bind,src=${userHome},dst=${userHome}",
-        "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
-      ]
-    },
-    "sse-mcp-git-commit-generator": {
-      "type": "sse",
-      "url": "http://localhost:3001/sse"
-    },
-    "stdio-mcp-git-commit-generator": {
-      "type": "stdio",
-      "command": "${command:python.interpreterPath}",
-      "args": ["-m", "mcp_git_commit_generator", "--transport", "stdio"]
-    },
-    "uvx-mcp-git-commit-generator": {
       "command": "uvx",
       "args": ["mcp-git-commit-generator"]
     }
@@ -561,54 +107,108 @@ different modes (stdio is default, SSE is optional) for development and debuggin
 }
 ```
 
-- **mcp-git-commit-generator**: Runs the server in a Docker container (default: stdio transport), using the published image.
-- **sse-mcp-git-commit-generator**: Connects to the MCP server using Server-Sent Events (SSE) at `http://localhost:3001/sse`.
-Only useful if you run the server with `--transport sse`.
-- **stdio-mcp-git-commit-generator**: Connects using standard input/output (stdio), running the server as a subprocess.
-This is the default and recommended for local development and debugging.
-- **uvx-mcp-git-commit-generator**: Uses uvx to automatically install and run the package from PyPI.
+VS Code uses a top-level `servers` object:
 
-### 🐞 Debugging the MCP Server
+```json
+{
+  "servers": {
+    "mcp-git-commit-generator": {
+      "command": "uvx",
+      "args": ["mcp-git-commit-generator"]
+    }
+  }
+}
+```
 
-> Notes:
->
-> - [MCP Inspector](https://github.com/modelcontextprotocol/inspector) is a visual developer tool for testing
-and debugging MCP servers.
-> - All debugging modes support breakpoints, so you can add breakpoints to the tool implementation code.
-> - **You can test tool arguments directly in the Inspector UI**: When using the Inspector, select a tool and provide
-arguments in the input fields to simulate real usage and debug argument handling.
+### Streamable HTTP
 
-| Debug Mode | Description | Steps to debug |
-| ---------- | ----------- | --------------- |
-| MCP Inspector | Debug the MCP server using the MCP Inspector. | 1. Install [Node.js](https://nodejs.org/)<br> 2. Set up Inspector: `cd inspector` && `npm install` <br> 3. Open VS Code Debug panel. Select `Debug in Inspector (Edge)` or `Debug in Inspector (Chrome)`. Press F5 to start debugging.<br> 4. When MCP Inspector launches in the browser, click the `Connect` button to connect this MCP server.<br> 5. Then you can `List Tools`, select a tool, input parameters (see arguments above), and `Run Tool` to debug your server code.<br> |
+Start the local server:
 
-### ⚙️ Default Ports and Customizations
+```sh
+uv run mcp-git-commit-generator \
+  --transport streamable-http \
+  --host 127.0.0.1 \
+  --port 3001
+```
 
-| Debug Mode | Ports | Definitions | Customizations | Note |
-| ---------- | ----- | ------------ | -------------- |-------------- |
-| MCP Inspector | 3001 (Server, SSE only); 5173 and 3000 (Inspector) | [tasks.json](.vscode/tasks.json) | Edit [launch.json](.vscode/launch.json), [tasks.json](.vscode/tasks.json), [\_\_init\_\_.py](src/__init__.py), [mcp.json](.vscode/mcp.json) to change above ports.| N/A |
+Connect the client to:
 
-## 💬 Feedback
+```text
+http://127.0.0.1:3001/mcp
+```
 
-If you have any feedback or suggestions, please open an issue on the [MCP Git Commit Generator GitHub repository](https://github.com/theoklitosBam7/mcp-git-commit-generator/issues)
+The HTTP mode has no application authentication. The default bind address is loopback for this reason. If you need remote access, put the server behind an authenticated TLS reverse proxy and restrict network access.
 
-## 📖 Troubleshooting
+### Legacy SSE
 
-### Common Issues
+Older clients can still use SSE:
 
-- **"Path is not a valid git repository"**: Ensure you're in a directory with a `.git` folder
-- **"No staged changes found"**: Run `git add <files>` to stage your changes first
-- **"Git is not installed"**: Install Git from [git-scm.com](https://git-scm.com/)
-- **Docker permission issues**: Ensure Docker can access your home directory
-- **MCP connection fails**: Verify your client configuration matches the examples above
+```sh
+uv run mcp-git-commit-generator \
+  --transport sse \
+  --host 127.0.0.1 \
+  --port 3001
+```
 
-### Getting Help
+New integrations should use stdio or Streamable HTTP.
 
-- Check the [Issues page](https://github.com/theoklitosBam7/mcp-git-commit-generator/issues) for solutions
-- Use the Inspector UI for interactive debugging
-- Run `uv run pytest -v` to verify your installation (recommended)
-- Or run `pytest -v` if using pip
+## Development
 
-## 📄 License
+Install the locked environment:
 
-[MIT](./LICENSE) License © 2025 [Theoklitos Bampouris](https://github.com/theoklitosBam7)
+```sh
+uv sync --all-groups
+```
+
+Run the checks:
+
+```sh
+uv run python -m compileall -q src tests
+uv run pytest
+uv run pip-audit --local
+uv build --locked
+```
+
+### MCP Inspector v2
+
+```sh
+cd inspector
+npm ci
+npm run dev:inspector
+```
+
+Start the server separately with Streamable HTTP and connect Inspector to `http://127.0.0.1:3001/mcp`.
+
+## CI and supply-chain controls
+
+The repository uses these controls:
+
+- GitHub Actions are pinned to full commit SHAs.
+- Python tests run on Linux, macOS, and Windows.
+- Python dependencies are locked with `uv.lock` and audited with `pip-audit`.
+- Inspector dependencies are locked with `package-lock.json` and checked with `npm audit`.
+- Pull requests use GitHub dependency review for high-severity dependency changes.
+- Dependabot checks uv, npm, GitHub Actions, and Docker dependencies.
+- Container builds produce provenance and an SBOM.
+- PyPI publishing uses GitHub OIDC trusted publishing and package attestations.
+
+## Security model
+
+Repository names, paths, file contents, and diffs are attacker-controlled input. The server serializes repository context as JSON and tells the downstream model to use those values only as evidence about the change. It does not treat instructions hidden inside a staged diff as trusted instructions.
+
+Git is executed as an argument list with `shell=False` behavior. The server disables external diffs, interactive prompts, and pagers for tool operations. It also applies a command timeout.
+
+For Docker, prefer a narrow read-only repository mount instead of mounting the whole home directory.
+
+## Release
+
+1. Update `version` in `pyproject.toml`.
+2. Run all checks and refresh both lockfiles.
+3. Create a matching tag, for example `v2.3.0`.
+4. Push the tag.
+
+Tag pushes build and publish the Python package and container image. PyPI uses trusted publishing.
+
+## License
+
+[MIT](./LICENSE) © 2025-2026 Theoklitos Bampouris
