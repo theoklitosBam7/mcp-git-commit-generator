@@ -7,7 +7,7 @@ Guidance for agents working in this repository.
 - `uv sync --all-groups` installs the locked development environment.
 - `uv run pytest` runs the test suite.
 - `uv run python -m compileall -q src tests` checks Python syntax.
-- `uv build --locked` builds release artifacts from the lockfile.
+- `uv build` builds release artifacts from the lockfile.
 - `uv run mcp-git-commit-generator --transport streamable-http` starts the HTTP development server at `127.0.0.1:3001/mcp`.
 - `cd inspector && npm ci && npm run dev:inspector` starts MCP Inspector v2.
 
