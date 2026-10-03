@@ -5,13 +5,8 @@
       "name": "Attach to Local MCP",
       "type": "debugpy",
       "request": "attach",
-      "connect": {
-        "host": "localhost",
-        "port": 5678
-      },
-      "presentation": {
-        "hidden": true
-      },
+      "connect": { "host": "127.0.0.1", "port": 5678 },
+      "presentation": { "hidden": true },
       "internalConsoleOptions": "neverOpen",
       "postDebugTask": "Terminate All Tasks"
     },
@@ -19,22 +14,18 @@
       "name": "Launch Inspector (Edge)",
       "type": "msedge",
       "request": "launch",
-      "url": "http://localhost:5173?timeout=60000&serverUrl=http://localhost:3001/sse#tools",
+      "url": "http://localhost:5173?timeout=60000&serverUrl=http://127.0.0.1:3001/mcp#tools",
       "cascadeTerminateToConfigurations": ["Attach to Local MCP"],
-      "presentation": {
-        "hidden": true
-      },
+      "presentation": { "hidden": true },
       "internalConsoleOptions": "neverOpen"
     },
     {
       "name": "Launch Inspector (Chrome)",
       "type": "chrome",
       "request": "launch",
-      "url": "http://localhost:5173?timeout=60000&serverUrl=http://localhost:3001/sse#tools",
+      "url": "http://localhost:5173?timeout=60000&serverUrl=http://127.0.0.1:3001/mcp#tools",
       "cascadeTerminateToConfigurations": ["Attach to Local MCP"],
-      "presentation": {
-        "hidden": true
-      },
+      "presentation": { "hidden": true },
       "internalConsoleOptions": "neverOpen"
     }
   ],

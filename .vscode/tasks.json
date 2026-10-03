@@ -9,28 +9,20 @@
         "-m",
         "debugpy",
         "--listen",
-        "localhost:5678",
+        "127.0.0.1:5678",
         "-m",
         "mcp_git_commit_generator",
         "--transport",
-        "sse"
+        "streamable-http",
+        "--host",
+        "127.0.0.1",
+        "--port",
+        "3001"
       ],
       "isBackground": true,
-      "options": {
-        "cwd": "${workspaceFolder}",
-        "env": {
-          "PORT": "3001"
-        }
-      },
+      "options": { "cwd": "${workspaceFolder}" },
       "problemMatcher": {
-        "pattern": [
-          {
-            "regexp": "^.*$",
-            "file": 0,
-            "location": 1,
-            "message": 2
-          }
-        ],
+        "pattern": [{ "regexp": "^.*$", "file": 0, "location": 1, "message": 2 }],
         "background": {
           "activeOnStart": true,
           "beginsPattern": ".*",
@@ -45,24 +37,14 @@
       "isBackground": true,
       "options": {
         "cwd": "${workspaceFolder}/inspector",
-        "env": {
-          "CLIENT_PORT": "5173",
-          "SERVER_PORT": "3000"
-        }
+        "env": { "CLIENT_PORT": "5173", "SERVER_PORT": "3000" }
       },
       "problemMatcher": {
-        "pattern": [
-          {
-            "regexp": "^.*$",
-            "file": 0,
-            "location": 1,
-            "message": 2
-          }
-        ],
+        "pattern": [{ "regexp": "^.*$", "file": 0, "location": 1, "message": 2 }],
         "background": {
           "activeOnStart": true,
-          "beginsPattern": "Starting MCP inspector",
-          "endsPattern": "⚙️ Proxy server listening on"
+          "beginsPattern": "Starting MCP inspector|MCP Inspector",
+          "endsPattern": "Proxy server listening|localhost:5173"
         }
       },
       "dependsOn": ["Start MCP Server"]
