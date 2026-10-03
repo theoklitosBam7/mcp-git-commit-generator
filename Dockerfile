@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-FROM python:3.14.8-slim-trixie AS builder
+FROM python:3.15.0rc2-slim-trixie AS builder
 
 COPY --from=ghcr.io/astral-sh/uv:0.12.21 /uv /uvx /bin/
 
@@ -16,7 +16,7 @@ COPY src ./src
 RUN --mount=type=cache,target=/root/.cache/uv \
     uv sync --locked --no-dev --no-editable
 
-FROM python:3.14.8-slim-trixie AS runtime
+FROM python:3.15.0rc2-slim-trixie AS runtime
 
 LABEL org.opencontainers.image.source="https://github.com/theoklitosBam7/mcp-git-commit-generator" \
       org.opencontainers.image.description="Generate Conventional Commit messages from staged Git changes using MCP." \
