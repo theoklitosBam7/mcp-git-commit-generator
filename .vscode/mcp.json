@@ -6,14 +6,17 @@
         "run",
         "-i",
         "--rm",
+        "--read-only",
+        "--cap-drop=ALL",
+        "--security-opt=no-new-privileges:true",
         "--mount",
-        "type=bind,src=${userHome},dst=${userHome}",
+        "type=bind,src=${workspaceFolder},dst=${workspaceFolder},readonly",
         "ghcr.io/theoklitosbam7/mcp-git-commit-generator:latest"
       ]
     },
-    "sse-mcp-git-commit-generator": {
-      "type": "sse",
-      "url": "http://localhost:3001/sse"
+    "http-mcp-git-commit-generator": {
+      "type": "http",
+      "url": "http://127.0.0.1:3001/mcp"
     },
     "stdio-mcp-git-commit-generator": {
       "type": "stdio",
