@@ -166,7 +166,7 @@ Run the checks:
 uv run python -m compileall -q src tests
 uv run pytest
 uv run pip-audit --local
-uv build --locked
+uv build
 ```
 
 ### MCP Inspector v2
