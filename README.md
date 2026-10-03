@@ -187,7 +187,6 @@ The repository uses these controls:
 - Python tests run on Linux, macOS, and Windows.
 - Python dependencies are locked with `uv.lock` and audited with `pip-audit`.
 - Inspector dependencies are locked with `package-lock.json` and checked with `npm audit`.
-- Pull requests use GitHub dependency review for high-severity dependency changes.
 - Dependabot checks uv, npm, GitHub Actions, and Docker dependencies.
 - Container builds produce provenance and an SBOM.
 - PyPI publishing uses GitHub OIDC trusted publishing and package attestations.
