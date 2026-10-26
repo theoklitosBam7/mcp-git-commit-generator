@@ -10,6 +10,6 @@
     "dev:inspector": "mcp-inspector"
   },
   "devDependencies": {
-    "@modelcontextprotocol/inspector": "2.9.0"
+    "@modelcontextprotocol/inspector": "2.12.0"
   }
 }
